@@ -65,7 +65,7 @@ async def retry_capture(
     if not run:
         raise HTTPException(404, "Run not found")
     await owned_employee(db, run.org_id, run.employee_id, current_user.id)
-    if run.capture_status == "skipped":
+    if run.capture_status in {"skipped", "router"}:
         raise HTTPException(409, "Memory capture was disabled for this run.")
     await capture_run(run.id)
     await db.refresh(run)

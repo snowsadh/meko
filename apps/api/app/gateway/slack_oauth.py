@@ -1,10 +1,12 @@
-from uuid import UUID
 from urllib.parse import urlencode
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
+from slack_sdk.errors import SlackApiError
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User
@@ -16,6 +18,7 @@ from app.core.security import encrypt_token
 from app.employees.models import Employee
 from app.gateway.fixed_bots import get_fixed_bot
 from app.memory.scopes import owned_employee, require_pack
+from app.organizations.models import Organization
 
 router = APIRouter(prefix="/api/slack", tags=["slack"])
 _SLACK_BOT_SCOPES = [
@@ -26,8 +29,6 @@ _SLACK_BOT_SCOPES = [
     "im:history",
     "im:write",
     "mpim:history",
-    "files:read",
-    "files:write",
 ]
 
 
@@ -89,7 +90,11 @@ async def slack_install(
 
 @router.get("/oauth/callback")
 async def slack_oauth_callback(
-    request: Request, code: str, state: str, db: AsyncSession = Depends(get_db)
+    request: Request,
+    state: str,
+    code: str | None = None,
+    error: str | None = None,
+    db: AsyncSession = Depends(get_db),
 ):
     payload = decode_oauth_state(
         "slack-oauth-state", state, required_fields={"employee_id", "org_id", "owner_id"}
@@ -99,15 +104,46 @@ async def slack_oauth_callback(
     org, emp = await owned_employee(
         db, UUID(payload["org_id"]), UUID(payload["employee_id"]), UUID(payload["owner_id"])
     )
+    destination = f"{settings.frontend_url.rstrip('/')}/dashboard/{emp.id}"
+    if error or not code:
+        return frontend_redirect(
+            str(emp.id),
+            False,
+            "slack",
+            detail="Slack access was not granted.",
+            redirect_to=destination,
+        )
     client_id, secret = credentials(emp)
-    response = await AsyncWebClient().oauth_v2_access(
-        client_id=client_id, client_secret=secret, code=code, redirect_uri=redirect_uri(request)
-    )
+    try:
+        response = await AsyncWebClient(retry_handlers=[]).oauth_v2_access(
+            client_id=client_id, client_secret=secret, code=code, redirect_uri=redirect_uri(request)
+        )
+    except SlackApiError:
+        return frontend_redirect(
+            str(emp.id),
+            False,
+            "slack",
+            detail="Slack authorization failed. Check its redirect URL and reconnect.",
+            redirect_to=destination,
+        )
     if not response.get("ok") or not response.get("access_token"):
         raise HTTPException(502, "Slack did not authorize the employee.")
     team = response.get("team", {})
     if not team.get("id"):
         raise HTTPException(502, "Slack did not identify the workspace.")
+    if not response.get("bot_user_id"):
+        raise HTTPException(502, "Slack did not identify the bot user.")
+    if org.slack_team_id and org.slack_team_id != team["id"]:
+        raise HTTPException(
+            409, "This company is already connected to a different Slack workspace."
+        )
+    other_company = await db.scalar(
+        select(Organization.id).where(
+            Organization.slack_team_id == team["id"], Organization.id != org.id
+        )
+    )
+    if other_company:
+        raise HTTPException(409, "This Slack workspace belongs to another company workspace.")
     statement = select(Employee).where(Employee.slack_team_id == team["id"], Employee.id != emp.id)
     if settings.slack_identity_mode == "fixed":
         statement = statement.where(Employee.employee_type == emp.employee_type)
@@ -117,7 +153,15 @@ async def slack_oauth_callback(
     emp.slack_team_id, emp.slack_team_name = team["id"], team.get("name")
     emp.slack_bot_user_id = response.get("bot_user_id")
     emp.status = "active"
-    await db.commit()
+    org.slack_team_id, org.slack_team_name = team["id"], team.get("name")
+    try:
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        raise HTTPException(
+            409,
+            "Slack was connected by another request. Refresh the employee page.",
+        ) from exc
     return frontend_redirect(
         str(emp.id),
         True,

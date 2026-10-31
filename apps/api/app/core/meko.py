@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import base64
 import hashlib
+import asyncio
 from typing import Any
 from uuid import UUID
 
@@ -101,12 +102,15 @@ class MekoClient:
     async def call(self, name: str, *, datapack_id: str, **arguments: Any) -> Any:
         arguments["datapack_id"] = product_pack(datapack_id)
         try:
-            async with streamablehttp_client(
-                settings.meko_mcp_url,
-                headers=self.headers,
-                timeout=settings.meko_timeout_seconds,
-                sse_read_timeout=settings.meko_timeout_seconds,
-            ) as (read, write, _):
+            async with (
+                asyncio.timeout(settings.meko_timeout_seconds),
+                streamablehttp_client(
+                    settings.meko_mcp_url,
+                    headers=self.headers,
+                    timeout=settings.meko_timeout_seconds,
+                    sse_read_timeout=settings.meko_timeout_seconds,
+                ) as (read, write, _),
+            ):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
                     result = await session.call_tool(name, arguments)
@@ -116,6 +120,36 @@ class MekoClient:
         except Exception as exc:
             # A write may have reached the server. Never silently retry it.
             raise MekoError("Meko operation was interrupted; its result is unconfirmed.") from exc
+
+    async def save_turn(self, pack, agent, conversation, input, output, *, seed, metadata=None):
+        await self.call(
+            "conversation_add_message",
+            datapack_id=pack,
+            agent_id=agent,
+            conversation_id=conversation,
+            input=input,
+            output=output,
+            seed=seed,
+            metadata=json.dumps(metadata or {}),
+        )
+        result = await self.call(
+            "conversation_get",
+            datapack_id=pack,
+            agent_id=agent,
+            conversation_id=conversation,
+            include_messages=True,
+        )
+
+        def contains_turn(value):
+            if isinstance(value, dict):
+                if value.get("input") == input and (not output or value.get("output") == output):
+                    return True
+                return any(contains_turn(item) for item in value.values())
+            return isinstance(value, list) and any(contains_turn(item) for item in value)
+
+        if not contains_turn(result):
+            raise MekoError("Conversation save was not confirmed on readback.")
+        return result
 
     async def ensure_datapack(self, name: str, description: str) -> str:
         # Resolve first: retries after a lost create response reuse the same pack and quota slot.

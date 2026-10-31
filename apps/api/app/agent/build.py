@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 
 from app.agent.models import AgentRun
@@ -61,7 +61,7 @@ async def capture_run(run_id):
     """Durable pending/failed status; retries use the same conversation and dedup seed."""
     async with async_session_factory() as db:
         run = await db.get(AgentRun, run_id)
-        if not run or run.status != "completed" or run.capture_status in {"saved", "skipped"}:
+        if not run or run.status != "completed" or run.capture_status in {"saved", "skipped", "router"}:
             return
         emp = await db.get(Employee, run.employee_id)
         if emp is None or emp.org_id != run.org_id:
@@ -71,15 +71,14 @@ async def capture_run(run_id):
             await db.commit()
             return
         try:
-            await meko.call(
-                "conversation_add_message",
-                datapack_id=require_pack(emp),
-                agent_id=employee_agent(emp.id),
-                conversation_id=run.meko_conversation_id,
-                input=run.input,
-                output=run.output or "",
+            await meko.save_turn(
+                require_pack(emp),
+                employee_agent(emp.id),
+                run.meko_conversation_id,
+                run.input,
+                run.output or "",
                 seed=str(run.id),
-                metadata=json.dumps({"openhuman_run_id": str(run.id), "platform": run.platform}),
+                metadata={"openhuman_run_id": str(run.id), "platform": run.platform},
             )
             run.capture_status = "saved"
             run.error = None
@@ -108,25 +107,38 @@ async def run_agent(
         raise HTTPException(409, "This employee is suspended.")
     request_key = f"{emp.id}:{request_key or uuid4()}"
     prior = await db.scalar(select(AgentRun).where(AgentRun.request_key == request_key))
-    if prior:
+    if prior and prior.status != "queued":
         prior._new_request = False
         return prior
-    run = AgentRun(
-        id=uuid4(),
-        org_id=org.id,
-        employee_id=emp.id,
-        input=message,
-        platform=platform,
-        request_key=request_key,
-        thread_key=thread_key or str(uuid4()),
-        recalled=[],
-        tools=[],
-        status="running",
-        context_version=emp.context_version,
-        delivery_status="pending" if platform == "slack" else "not_applicable",
-        capture_status="pending" if use_meko and emp.auto_memory else "skipped",
-    )
-    db.add(run)
+    if prior:
+        claimed = await db.scalar(
+            update(AgentRun)
+            .where(AgentRun.id == prior.id, AgentRun.status == "queued")
+            .values(status="running")
+            .returning(AgentRun.id)
+        )
+        await db.commit()
+        if claimed is None:
+            prior._new_request = False
+            return prior
+        run = prior
+    else:
+        run = AgentRun(
+            id=uuid4(),
+            org_id=org.id,
+            employee_id=emp.id,
+            input=message,
+            platform=platform,
+            request_key=request_key,
+            thread_key=thread_key or str(uuid4()),
+            recalled=[],
+            tools=[],
+            status="running",
+            context_version=emp.context_version,
+            delivery_status="pending" if platform == "slack" else "not_applicable",
+            capture_status="pending" if use_meko and emp.auto_memory else "skipped",
+        )
+        db.add(run)
     run._new_request = True
     try:
         await db.commit()
@@ -257,6 +269,8 @@ async def run_agent(
     except Exception as exc:
         run.status = "failed"
         run.capture_status = "skipped"
+        if run.platform == "slack":
+            run.delivery_status = "not_sent"
         run.error = (
             str(exc.detail)
             if isinstance(exc, HTTPException)
