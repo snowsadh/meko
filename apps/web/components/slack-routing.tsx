@@ -146,7 +146,7 @@ export function SlackRouting({
           Calls OpenAI to choose destinations. Does not send this preview to
           Slack or Meko.
         </p>
-        <Button size="sm" variant="outline" disabled={busy || !text.trim()}>
+        <Button type="submit" size="sm" variant="outline" disabled={busy || !text.trim()}>
           {busy ? "Checking…" : "Check destinations"}
         </Button>
       </form>
