@@ -102,7 +102,9 @@ async def create_employee(
         name=data.name,
         role=data.role or template.role,
         personality=data.personality or template.default_personality,
-        specialization=data.specialization or data.employee_type,
+        specialization=data.specialization if data.specialization is not None else (
+            "HR" if data.employee_type == "hr" else data.employee_type.replace("-", " ").title()
+        ),
         employee_type=data.employee_type,
         duties=data.duties if data.duties is not None else template.suggested_duties,
         memory_policy=data.memory_policy,
