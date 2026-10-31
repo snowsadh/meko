@@ -238,7 +238,10 @@ export default function EmployeeDetailPage() {
       if (!orgId) return;
       updateMutation.mutate(
         { orgId, empId, data },
-        { onSuccess: () => invalidate() },
+        {
+          onSuccess: () => invalidate(),
+          onError: (error) => toast.error(error instanceof ApiError ? error.messageText : "Could not save employee settings."),
+        },
       );
     },
     [orgId, empId, updateMutation, invalidate],
@@ -394,15 +397,19 @@ export default function EmployeeDetailPage() {
   );
 
   useEffect(() => {
-    if (employee) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocalName(employee.name);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocalRole(employee.role);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocalSpecialization(employee.specialization);
-    }
-  }, [apiEmployee]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocalName(apiEmployee?.name ?? "");
+  }, [apiEmployee?.name]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocalRole(apiEmployee?.role ?? "");
+  }, [apiEmployee?.role]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocalSpecialization(apiEmployee?.specialization ?? "");
+  }, [apiEmployee?.specialization]);
 
   const displayedMemoryEntries = (memoryExplorer?.memories ?? []).map(entry => ({
     id: entry.id, memory: entry.data || entry.memory || "", updated_at: entry.updated_at, document_ids: [] as string[],
@@ -552,7 +559,7 @@ export default function EmployeeDetailPage() {
             onClick={() => startEdit("role", employee.role)}
             title="Click to edit"
           >
-            {employee.role}
+            {localRole || "—"}
           </span>
         )}
       </div>
@@ -571,16 +578,16 @@ export default function EmployeeDetailPage() {
                 )}
               />
               <h3 className="text-base font-semibold text-foreground">Info</h3>
-              {employee.specialization && (
+              {localSpecialization && (
                 <span className="ml-auto inline-flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
-                  {employee.specialization}
+                  {localSpecialization}
                 </span>
               )}
             </div>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <InfoRow label="Name" value={employee.name} />
-            <InfoRow label="Role" value={employee.role || "—"} />
+            <InfoRow label="Role" value={localRole || "—"} />
             <InfoRow
               label="Employee Type"
               value={
@@ -592,7 +599,7 @@ export default function EmployeeDetailPage() {
             />
             <InfoRow
               label="Specialization"
-              value={employee.specialization || "—"}
+              value={localSpecialization || "—"}
             />
             <InfoRow label="Status" value={statusConfig.label} />
             <InfoRow
@@ -650,8 +657,9 @@ export default function EmployeeDetailPage() {
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label>Name</Label>
+                <Label htmlFor="employee-name">Name</Label>
                 <Input
+                  id="employee-name"
                   value={localName}
                   onChange={(e) => setLocalName(e.target.value)}
                   onBlur={() => {
@@ -662,27 +670,29 @@ export default function EmployeeDetailPage() {
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>Role</Label>
+                <Label htmlFor="employee-role">Role</Label>
                 <Input
+                  id="employee-role"
                   value={localRole}
                   onChange={(e) => setLocalRole(e.target.value)}
                   onBlur={() => {
                     if (localRole !== employee.role) {
-                      doUpdate({ role: localRole.trim() || undefined });
+                      doUpdate({ role: localRole.trim() });
                     }
                   }}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>Specialization</Label>
+                <Label htmlFor="employee-specialization">Specialization</Label>
                 <Input
+                  id="employee-specialization"
                   value={localSpecialization}
                   placeholder="e.g. Technical billing & refunds"
                   onChange={(e) => setLocalSpecialization(e.target.value)}
                   onBlur={() => {
                     if (localSpecialization !== employee.specialization) {
                       doUpdate({
-                        specialization: localSpecialization.trim() || undefined,
+                        specialization: localSpecialization.trim(),
                       });
                     }
                   }}
