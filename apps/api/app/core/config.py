@@ -66,6 +66,9 @@ class Settings(BaseSettings):
 
     # Bot Gateway
     gateway_enabled: bool = False
+    slack_memory_enabled: bool = False
+    slack_router_batch_seconds: float = 30
+    slack_router_max_messages: int = 12
 
     # Slack App Token (for socket mode)
     slack_app_token: str = ""

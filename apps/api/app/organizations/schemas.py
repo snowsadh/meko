@@ -29,4 +29,6 @@ class OrganizationResponse(BaseModel):
     owner_id: UUID
     meko_datapack_id: str | None = None
     memory_setup_error: str | None = None
+    slack_team_id: str | None = None
+    slack_team_name: str | None = None
     created_at: datetime

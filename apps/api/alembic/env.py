@@ -23,6 +23,7 @@ import app.agent.jobs.models  # noqa: F401
 import app.agent.models  # noqa: F401
 import app.memory_sources.models  # noqa: F401
 import app.mcp.models  # noqa: F401
+import app.gateway.models  # noqa: F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)

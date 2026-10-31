@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 class Employee(Base):
     __tablename__ = "employees"
     __table_args__ = (
+        sa.Index("uq_employee_slack_identity", "slack_team_id", "slack_bot_user_id", unique=True),
         CheckConstraint(
             "status IN ('active', 'inactive', 'suspended')",
             name="ck_employees_status",

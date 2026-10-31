@@ -21,6 +21,8 @@ class AgentRun(Base):
     request_key: Mapped[str] = mapped_column(String(255), unique=True)
     thread_key: Mapped[str] = mapped_column(String(255), index=True)
     platform: Mapped[str] = mapped_column(String(20), default="web")
+    slack_channel_id: Mapped[str | None] = mapped_column(String(100))
+    slack_thread_ts: Mapped[str | None] = mapped_column(String(50))
     input: Mapped[str] = mapped_column(Text)
     output: Mapped[str | None] = mapped_column(Text)
     recalled: Mapped[list] = mapped_column(JSONB, default=list)
