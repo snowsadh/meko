@@ -1,3 +1,5 @@
+import asyncio
+import json
 from datetime import UTC, datetime, timedelta
 from urllib.parse import parse_qs, urlparse
 from uuid import UUID, uuid4
@@ -14,6 +16,7 @@ from app.employees.models import Employee
 from app.gateway import slack_oauth
 from app.gateway.models import SlackChunk, SlackMessage
 from app.gateway.routing import (
+    RouterChoice,
     RoutingDecision,
     SlackRouterWorker,
     choose_destinations,
@@ -36,7 +39,16 @@ class RouterModel:
 
     async def ainvoke(self, messages):
         self.calls.append(messages)
-        return self.decision.model_copy(deep=True)
+        roster = json.loads(messages[-1].content)["employees"]
+        keys = {row["id"]: row["key"] for row in roster}
+        return RouterChoice(
+            company=self.decision.company,
+            employee_keys=[
+                keys.get(str(identifier), str(identifier))
+                for identifier in self.decision.employee_ids
+            ],
+            reason=self.decision.reason,
+        )
 
 
 class SlackClient:
@@ -50,7 +62,7 @@ class SlackClient:
         self.posts.append(kwargs)
         if self.fail:
             raise TimeoutError("Uncertain delivery")
-        return {"ok": True, "ts": "1700000002.000001"}
+        return {"ok": True, "ts": f"170000001{len(self.posts)}.000001"}
 
 
 async def connect(org, employee, *, team="TLOCAL", bot="USUPPORT"):
@@ -91,6 +103,14 @@ async def test_oauth_ownership_state_and_workspace(product, monkeypatch):
     headers, org, support, _ = await setup_company(client)
     monkeypatch.setattr(
         slack_oauth, "credentials", lambda emp: ("synthetic-client", "synthetic-secret")
+    )
+    payload = {"org_id": org["id"], "employee_id": support["id"]}
+    monkeypatch.setattr(settings, "slack_oauth_redirect_uri", "http://localhost/callback")
+    assert (
+        await client.post("/api/slack/install", headers=headers, json=payload)
+    ).status_code == 503
+    monkeypatch.setattr(
+        settings, "slack_oauth_redirect_uri", "https://synthetic.example/api/slack/oauth/callback"
     )
     install = await client.post(
         "/api/slack/install",
@@ -231,6 +251,46 @@ async def test_paused_employee_and_private_roster(product):
 
 
 @pytest.mark.asyncio
+async def test_reply_worker_keeps_one_thread_in_order(product, monkeypatch):
+    client, _, model = product
+    _, org, support, _ = await setup_company(client)
+    await connect(org, support)
+    gateway = SlackGateway(build.async_session_factory, SlackClient)
+    SlackClient.posts, SlackClient.fail = [], False
+    await gateway.process("support", event("<@USUPPORT> First", kind="app_mention"))
+    await gateway.process(
+        "support", event("Second", ts="1700000001.000001", thread_ts="1700000000.000001")
+    )
+    started, release, entered = asyncio.Event(), asyncio.Event(), []
+    original = model.ainvoke
+
+    async def waiting_model(messages):
+        entered.append(messages[-1].content)
+        if len(entered) == 1:
+            started.set()
+            await release.wait()
+        return await original(messages)
+
+    monkeypatch.setattr(model, "ainvoke", waiting_model)
+    worker = asyncio.create_task(gateway.run_replies())
+    try:
+        await asyncio.wait_for(started.wait(), timeout=5)
+        await asyncio.sleep(1.2)  # Give the worker another poll while the first reply is blocked.
+        assert entered == ["<@USUPPORT> First"]
+        release.set()
+        async with asyncio.timeout(6):
+            while len(SlackClient.posts) != 2:
+                await asyncio.sleep(0.05)
+        assert entered == ["<@USUPPORT> First", "Second"]
+    finally:
+        release.set()
+        gateway.stopping.set()
+        worker.cancel()
+        await asyncio.gather(worker, return_exceptions=True)
+        await gateway.stop()
+
+
+@pytest.mark.asyncio
 async def test_router_validates_private_scope_foreign_ids_and_disabled_memory(product):
     client, _, _ = product
     _, org, support, hr = await setup_company(client)
@@ -341,9 +401,7 @@ async def test_chunk_boundaries_noop_and_context_change(product, monkeypatch):
         for _ in range(3):
             chunk = await collect_chunk(db, now=datetime.now(UTC) + timedelta(minutes=1))
             assert len(chunk.messages) == 1
-        assert (
-            await collect_chunk(db, now=datetime.now(UTC) + timedelta(minutes=1)) is None
-        )
+        assert await collect_chunk(db, now=datetime.now(UTC) + timedelta(minutes=1)) is None
     classifier = RouterModel()
     worker = SlackRouterWorker(build.async_session_factory, classifier)
     monkeypatch.setattr(settings, "slack_memory_enabled", False)
@@ -366,3 +424,33 @@ async def test_chunk_boundaries_noop_and_context_change(product, monkeypatch):
         statuses = [target["status"] for chunk in chunks for target in chunk.deliveries.values()]
         assert sorted(statuses) == ["saved", "skipped"]
     assert len(fake.captures) == 1
+
+
+@pytest.mark.asyncio
+async def test_indexing_checks_are_spaced_and_service_errors_stop_retrying(product, monkeypatch):
+    client, fake, _ = product
+    _, org, support, _ = await setup_company(client)
+    await connect(org, support)
+    gateway = SlackGateway(build.async_session_factory, SlackClient)
+    await gateway.process("support", event("Approved company policy: all staff must use 2FA."))
+    monkeypatch.setattr(settings, "slack_router_batch_seconds", 0)
+    monkeypatch.setattr(settings, "slack_memory_enabled", True)
+    worker = SlackRouterWorker(build.async_session_factory, RouterModel(True))
+    await worker.step()
+    assert len(fake.files[org["meko_datapack_id"]]) == 1
+    assert not await worker.step()  # No rapid polling while indexing is pending.
+    async with build.async_session_factory() as db:
+        chunk = await db.scalar(select(SlackChunk))
+        identifier = chunk.id
+        chunk.claimed_at = datetime.now(UTC) - timedelta(seconds=31)
+        await db.commit()
+
+    async def unavailable(*_args, **_kwargs):
+        raise MekoError("Synthetic quota error")
+
+    monkeypatch.setattr(meko, "document_status", unavailable)
+    await worker.step()
+    async with build.async_session_factory() as db:
+        chunk = await db.get(SlackChunk, identifier)
+        assert chunk.status == "failed" and chunk.error == "Synthetic quota error"
+    assert not await worker.step()  # No automatic calls after a provider error.

@@ -45,6 +45,14 @@ async def get_source_model(db, org_id, source_id, user_id):
     )
 
 
+async def refresh_source(db, org_id, source_id, user_id):
+    source = await get_source_model(db, org_id, source_id, user_id)
+    if source is not None and source.status == "pending":
+        await _refresh(source)
+        await db.commit()
+    return source
+
+
 async def _upload(source):
     raw = source.content_bytes
     if raw is None and source.content_text is not None:

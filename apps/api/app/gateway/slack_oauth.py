@@ -1,4 +1,4 @@
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -66,6 +66,11 @@ async def slack_install(
     require_pack(org)
     require_pack(emp)
     client_id, _ = credentials(emp)
+    callback = urlsplit(redirect_uri(request))
+    if callback.scheme != "https" or not callback.netloc:
+        raise HTTPException(
+            503, "Set SLACK_OAUTH_REDIRECT_URI to the HTTPS callback registered in your Slack app."
+        )
     # Only an authenticated owner can initiate linking. The previous GET accepted
     # arbitrary employee IDs and could bind another company's employee to a workspace.
     state = encode_oauth_state(

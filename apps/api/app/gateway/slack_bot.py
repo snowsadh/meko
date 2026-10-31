@@ -11,6 +11,7 @@ from slack_sdk.socket_mode.response import SocketModeResponse
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.orm import aliased
 
 from app.agent.build import run_agent
 from app.agent.models import AgentRun
@@ -311,12 +312,28 @@ class SlackGateway:
         while not self.stopping.is_set():
             try:
                 async with self.session_factory() as db:
+                    earlier = aliased(AgentRun)
+                    unfinished = (
+                        select(earlier.id)
+                        .where(
+                            earlier.employee_id == AgentRun.employee_id,
+                            earlier.thread_key == AgentRun.thread_key,
+                            earlier.created_at < AgentRun.created_at,
+                            (earlier.status.in_(["queued", "running"]))
+                            | (
+                                (earlier.status == "completed")
+                                & earlier.delivery_status.in_(["pending", "posting"])
+                            ),
+                        )
+                        .exists()
+                    )
                     due = list(
                         (
                             await db.scalars(
                                 select(AgentRun.id)
                                 .where(
                                     AgentRun.platform == "slack",
+                                    ~unfinished,
                                     (AgentRun.status == "queued")
                                     | (
                                         (AgentRun.status == "completed")
