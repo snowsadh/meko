@@ -38,7 +38,7 @@ export function SiteNav() {
             { label: "Docs", href: "#", ariaLabel: "Documentation" },
             {
               label: "GitHub",
-              href: "https://github.com/openhuman/openhuman",
+              href: "https://github.com/snowsadh/meko",
               ariaLabel: "GitHub",
             },
           ],
