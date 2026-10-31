@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { SlackRouting } from "@/components/slack-routing";
 
 const message = (error: unknown) =>
   error instanceof ApiError
@@ -371,6 +372,7 @@ export function EmployeeActivity({
           </Button>
         </form>
       </details>
+      <SlackRouting orgId={orgId} employeeId={employeeId} />
       {isError && (
         <p role="alert" className="text-sm text-destructive">
           {message(error)}
@@ -414,7 +416,9 @@ export function EmployeeActivity({
                   ? "Conversation capture pending."
                   : run.capture_status === "skipped"
                     ? "Capture disabled for this run."
-                    : "Capture failed. The conversation is not confirmed saved."}
+                    : run.capture_status === "router"
+                      ? "Managed by the company chat router above."
+                      : "Capture failed. The conversation is not confirmed saved."}
             </p>
             {run.capture_status === "failed" && (
               <Button
