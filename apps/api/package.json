@@ -1,0 +1,7 @@
+{
+  "name": "@openhuman/api",
+  "private": true,
+  "scripts": {
+    "generate:spec": "uv run python scripts/generate_openapi.py"
+  }
+}

@@ -1,0 +1,46 @@
+services:
+  database:
+    image: yugabytedb/yugabyte:2026.1.2.0-b137
+    user: root
+    hostname: database
+    command: ["bin/yugabyted", "start", "--base_dir=/home/yugabyte/yb_data", "--background=false"]
+    volumes:
+      - database_data:/home/yugabyte/yb_data
+    ports:
+      - "127.0.0.1:5433:5433"
+    healthcheck:
+      test: ["CMD-SHELL", "bin/ysqlsh -h database -U yugabyte -d yugabyte -c 'SELECT 1' >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+  backend:
+    build: ./apps/api
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://yugabyte:yugabyte@database:5433/yugabyte
+      FRONTEND_URL: http://localhost:3000
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/ready >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 2m
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3000:3000"
+volumes:
+  database_data:
