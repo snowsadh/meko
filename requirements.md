@@ -5,7 +5,7 @@ track_name: Open project
 source_reviewed_on: 2026-10-31
 event_dates: "2026-10-31 to 2026-11-01"
 document_status: OpenHuman design approved; implementation in progress
-verification_status: Component checks recorded in docs/implementation-status.md; challenge acceptance pending
+verification_status: Checks and limits recorded in docs/architecture.md; challenge acceptance pending
 ---
 
 # Meko Track A requirements
@@ -14,7 +14,7 @@ verification_status: Component checks recorded in docs/implementation-status.md;
 
 OpenHuman is the selected company-coworker product. The previous capability selection is superseded: choose Meko uses that help this product, rather than preserving a fixed checklist.
 
-The confirmed product flow is company setup with optional shared documents, followed by onboarding employees from job templates, customising duties/instructions, adding employee documents, and connecting them to Slack. The website manages employees, documents, memories, and activity. Normal employee memory should form automatically from eligible conversations; publishing company-wide knowledge is a separate step. The approved integration plan is in [docs/architecture.md](docs/architecture.md); the supporting documentation review is in [docs/meko-notes.md](docs/meko-notes.md). The user approved separate employee datapacks and implementation. The approved Slack router selects destinations for chat chunks; keep the gateway off until credentials and destination checks are verified.
+The confirmed product flow is company setup with optional shared documents, followed by onboarding employees from job templates, customising duties/instructions, adding employee documents, and connecting them to Slack. The website manages employees, documents, memories, and activity. One shared router selects chat destinations: company knowledge, selected employees, both, or neither. Meko extracts private facts from accepted employee conversations. The approved integration plan is in [docs/architecture.md](docs/architecture.md); the supporting documentation review is in [docs/meko-notes.md](docs/meko-notes.md). The user approved separate employee datapacks and implementation. Keep live Slack listeners and memory delivery off until the intended workspace/channel and product scopes are verified.
 
 Natural uses are A2.1 (knowledge scopes), A2.2 (extracted facts), A2.3 (recall), A2.5 (sharing), and A2.6 (documents). Native A2.4 promotion does not move facts between datapacks; our cross-pack publication must not be called native promotion. These candidate categories still need a working product demonstration. The approved layout is one shared company datapack plus one private datapack per employee. YugabyteDB is the application database, separate from Meko's managed storage. OpenAI handles all application agent and tool-calling model requests; Meko manages its internal extraction.
 
@@ -39,7 +39,7 @@ Build an app of our own choosing in which remembered information changes what a 
 
 There are two separate uses of Meko to satisfy: the product uses it while running, and the team's coding agents (tools that help write and change the app) use it while building. Completing only one does not satisfy the challenge.
 
-This file records the challenge requirements and current direction above. The user has selected **Track A** and **OpenHuman** and clarified the company/employee/Slack flow. The final memory layout remains under discussion; a concrete demo will illustrate the product rather than replace its flow.
+This file records the challenge requirements and current direction above. The user selected **Track A** and **OpenHuman** and approved the company/employee/Slack flow, separate datapacks and shared chat router. A concrete demo will illustrate this product flow.
 
 ## 1. How to read and maintain this file
 
@@ -224,7 +224,7 @@ These notes help implementation; they do not select a stack or add competition d
 - **Connectivity:** Meko is online, and hosted models also require internet. The brief says the event can arrange at most one connection per team and advises bringing a hotspot. If using a local open model, download its trained model files before the event. [S1, pp. 1, 5]
 - **Accounts and docs:** the brief provides a Meko account for each teammate and directs teams to the quick start, core concepts, examples, and tool documentation. Confirm access early. [S1, p. 1; [S4](https://docs.mekodata.ai/)]
 
-This requirements file does not establish working product behavior. The coding agent's earlier build-memory connection is separate from product integration. Consult [implementation status](docs/implementation-status.md) for actual checks. End-to-end OpenAI/Slack behaviour, demo timing, and challenge acceptance remain pending.
+This requirements file does not establish working product behavior. Consult the [architecture and verification limits](docs/architecture.md) for actual checks. Live Slack installation/replies, fresh-account Meko conversation capture, demo timing, and challenge acceptance remain pending.
 
 ## 9. Scope boundaries: what Track A does not require
 

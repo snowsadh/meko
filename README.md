@@ -17,6 +17,16 @@ The first YugabyteDB image download is large. Data persists in the Compose volum
 
 Slack stays off until its app credentials are configured. `.env.example` lists the per-role Slack app settings. Use a private test channel first. No keys belong in chat, logs, source control or Meko memory.
 
+## Slack setup
+
+1. Configure each required role's Slack app credentials in `.env`. Enable Socket Mode and create an app-level token with `connections:write`.
+2. Set `SLACK_OAUTH_REDIRECT_URI` to the backend's public HTTPS URL ending in `/api/slack/oauth/callback`. Register that exact URL under each Slack app's OAuth & Permissions. Local development needs an HTTPS tunnel or a deployed backend for this callback. [Slack requires HTTPS for OAuth redirects](https://docs.slack.dev/authentication/installing-with-oauth/).
+3. Subscribe to bot events `app_mention`, `message.channels`, `message.groups`, `message.im`, and `message.mpim`. Requested bot scopes are `app_mentions:read`, `channels:history`, `groups:history`, `chat:write`, `im:history`, `im:write`, and `mpim:history`.
+4. Recreate the backend after environment changes. In the employee's configuration page, choose **Connect Slack**, finish Slack's approval, and invite that employee to the intended channels. One company uses one Slack workspace; fixed role apps each represent one employee in that workspace.
+5. Set `GATEWAY_ENABLED=true` and recreate the backend when ready to listen and reply. Keep `SLACK_MEMORY_ENABLED=false` while the Meko account lacks conversation quota. Enable it after valid product scopes and quota are available.
+
+An app-level token opens the event connection; installation supplies the separate bot token used to reply. Socket Mode does not require a public event webhook. The collapsed **Work and context** section shows app setup, routing previews, original chat, decisions and actual destination status. A routing preview uses OpenAI and writes nothing to Meko.
+
 ## How memory works
 
 - One company datapack holds shared knowledge; each AI employee has a separate datapack for private documents and memory.
@@ -36,7 +46,10 @@ From `apps/api`, set `DATABASE_URL=postgresql+asyncpg://yugabyte:yugabyte@localh
 ```sh
 bun run typecheck
 bun run build
+uv run --project apps/api python scripts/check_slack_router.py
 ```
+
+The routing check above makes real OpenAI calls using synthetic chat. It makes no Slack or Meko calls. Outcomes are model decisions, not a guarantee of classification accuracy.
 
 Backend checks require a disposable database whose name ends in `_test`. They reset that database's schema and use controlled service responses unless a live check is explicitly selected:
 
