@@ -1,0 +1,446 @@
+{
+  "reviewed_at": "2026-10-31T16:25:15.215418+00:00",
+  "status": "documentation review; not runtime verification",
+  "discovery": "public sitemap.xml plus same-origin navigation, four crawl rounds",
+  "scope": "All successful extracted main-page content was read; aliases are included in the URL count.",
+  "successful_html_urls": 66,
+  "extracted_words": 37657,
+  "failed_navigation_urls": 6,
+  "raw_extract_directory": "/tmp/meko-full-review",
+  "pages": [
+    {
+      "url": "https://docs.mekodata.ai/",
+      "file": "index.txt",
+      "words": 330,
+      "sha256": "6539701d6112bce2e2c56c8c037a092569f4d5d46f3e2f603287cfe321805045"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/",
+      "file": "architecture.txt",
+      "words": 212,
+      "sha256": "798c9ca5707e7df6829c6a69fcf709ee29a15f46119c1bd58cf28edce6a98a40"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/core-concepts/",
+      "file": "architecture__core-concepts.txt",
+      "words": 255,
+      "sha256": "087a75a286f2eee2ac2c90bf8b0b4fe41a8237fa6e5a49e5e1c3ad5adad59e1b"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/core-concepts/datapacks/",
+      "file": "architecture__core-concepts__datapacks.txt",
+      "words": 1202,
+      "sha256": "8a22cac38385508aa49e0ff3a1a9f37fcbc008214ff682437cf73d1abc16adac"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/core-concepts/knowledgebase/",
+      "file": "architecture__core-concepts__knowledgebase.txt",
+      "words": 355,
+      "sha256": "0f0b84a8ba0e34cbc89f102c2ff6b8d305a5444a60482a36553b4e09430e08a1"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/core-concepts/learnings/",
+      "file": "architecture__core-concepts__learnings.txt",
+      "words": 575,
+      "sha256": "fd9206f95acf18115b453065e01383451ee417038dbb4ae9a5fe8595b7967074"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/core-concepts/manage-access/",
+      "file": "architecture__core-concepts__manage-access.txt",
+      "words": 519,
+      "sha256": "e53aa0926503a0bfbf1d661541626abb72d2557b60f422c44af305cc7b3607ae"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/core-concepts/memory-retrieval/",
+      "file": "architecture__core-concepts__memory-retrieval.txt",
+      "words": 328,
+      "sha256": "c51e75bf1182a741efdc3444366f0b1549af361a3ded6c099fc4b99d77323dcf"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/core-concepts/memory/",
+      "file": "architecture__core-concepts__memory.txt",
+      "words": 571,
+      "sha256": "137ed7e7ce55135608efb461f4733c6caf9f20a816282bc61a6a3f0ab9f60bc8"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/core-concepts/oltp-data/",
+      "file": "architecture__core-concepts__oltp-data.txt",
+      "words": 255,
+      "sha256": "087a75a286f2eee2ac2c90bf8b0b4fe41a8237fa6e5a49e5e1c3ad5adad59e1b"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/core-concepts/projects/",
+      "file": "architecture__core-concepts__projects.txt",
+      "words": 502,
+      "sha256": "5db9198250f7546457d3a7a85b66284648900722372e4f0e475af2e918f0b58f"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/core-concepts/sharing/",
+      "file": "architecture__core-concepts__sharing.txt",
+      "words": 627,
+      "sha256": "9c42df134c3f737af75ef97d6b37593c1865fcd1c048c4e138dec9b111392dd2"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/core-concepts/traces/",
+      "file": "architecture__core-concepts__traces.txt",
+      "words": 233,
+      "sha256": "d5d7dff07d4faab8e24ac89e7a4d68acc814c8b57d2bcc2e2fae31f95d5911b8"
+    },
+    {
+      "url": "https://docs.mekodata.ai/architecture/how-meko-fits/",
+      "file": "architecture__how-meko-fits.txt",
+      "words": 375,
+      "sha256": "dcbc1d35d46c7c5b400b147fbc1344b6bf3cb252d10da070012406bb18dc3e64"
+    },
+    {
+      "url": "https://docs.mekodata.ai/categories/",
+      "file": "categories.txt",
+      "words": 1,
+      "sha256": "b8b1d894c683725260dcd78f8ed64f979331a1ab61fc8311e9ccfc300fd5de20"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/",
+      "file": "changelog.txt",
+      "words": 88,
+      "sha256": "268e33fbb12d840d607a2bfc536a3a5fb9174fa18ddc0ca5895dbf0a00b6aea3"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/installer/",
+      "file": "changelog__installer.txt",
+      "words": 268,
+      "sha256": "5841be9e7a1fd72c488f6c6d0567e4e59b29faff5777921a4c717013744c7739"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/installer/v1.0.5/",
+      "file": "changelog__installer__v1.0.5.txt",
+      "words": 160,
+      "sha256": "d703065658df29a0cba5a182235595ca6f6ba54a2721a4a471ad89538c160e19"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/installer/v1.0.6/",
+      "file": "changelog__installer__v1.0.6.txt",
+      "words": 106,
+      "sha256": "10bc9171b3f27ace7edf7bcd3f63c205d90042344c0213df4ed61c439a84b01d"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/installer/v1.1.0/",
+      "file": "changelog__installer__v1.1.0.txt",
+      "words": 378,
+      "sha256": "42d30f384d16e0d197f9d950b2ffdbe6f8c141732e1892dcda173ca43c6116f1"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/installer/v1.2.0/",
+      "file": "changelog__installer__v1.2.0.txt",
+      "words": 332,
+      "sha256": "d46753b1167d3f4a2b7b2499b95fca67139034e6f72e1481d846640bda1a3abb"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/installer/v2.0.0/",
+      "file": "changelog__installer__v2.0.0.txt",
+      "words": 535,
+      "sha256": "a9785734e4ee9c5ea19fa52a4b4593ec04e941ccc9e082664c64719a3d5ddab9"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/installer/v2.1.0/",
+      "file": "changelog__installer__v2.1.0.txt",
+      "words": 800,
+      "sha256": "faa1ead81c3feedf7f3db1f14162167986cf321ac59466a5377e60fa5102484b"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/installer/v2.2.0/",
+      "file": "changelog__installer__v2.2.0.txt",
+      "words": 480,
+      "sha256": "6dd95ee782854ccbaaeec4a5fe80c7b9a900c984137971d8246d1f19b7b7b2f8"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/installer/v2.3.0/",
+      "file": "changelog__installer__v2.3.0.txt",
+      "words": 914,
+      "sha256": "beec5444c75ec7e8394649981c554a9a2c17f860cc88471b0019e360941e8504"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/installer/v2.5.0/",
+      "file": "changelog__installer__v2.5.0.txt",
+      "words": 1078,
+      "sha256": "ae9c2e14fd31dcc2f019af30fc1f82a848cc4b9d0108aefc6623effb51600fed"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/installer/v2.5.1/",
+      "file": "changelog__installer__v2.5.1.txt",
+      "words": 588,
+      "sha256": "df900177e7e4cac2afee609a1f91379985e7ee1421dcd110429e04845fe61f0b"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/",
+      "file": "changelog__meko.txt",
+      "words": 291,
+      "sha256": "5de788bb438d5ed49647f7dadae2e827e33b4eb79af1b568939f968701d188cf"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/v0.9.0/",
+      "file": "changelog__meko__v0.9.0.txt",
+      "words": 155,
+      "sha256": "0ed76d88ed5c60dc53509e390ddc682fca2b1c9ab25a26312266d211efeb167b"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/v0.9.1/",
+      "file": "changelog__meko__v0.9.1.txt",
+      "words": 345,
+      "sha256": "fea283ce92c534ccbc2df13cb71186e50351e325adc563c3d59bd13340a9ac34"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/v0.9.2/",
+      "file": "changelog__meko__v0.9.2.txt",
+      "words": 146,
+      "sha256": "6ae02c5b6a64584b43959cac5907b9895839230d37507e9216db74e55e38fa17"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/v0.9.3/",
+      "file": "changelog__meko__v0.9.3.txt",
+      "words": 368,
+      "sha256": "6768275f3a56c5d66ef33544617b054d12d5a046cabcd6d67691c1b131d39c31"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/v0.9.4/",
+      "file": "changelog__meko__v0.9.4.txt",
+      "words": 282,
+      "sha256": "e68ec0defce6ce948f3295e3ba630cb7e16f749b5afc6aa9ec322e5385e506d0"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/v0.9.5/",
+      "file": "changelog__meko__v0.9.5.txt",
+      "words": 298,
+      "sha256": "e81fa9fd299844973c1e5afff64ec7f32bb6e0746e33734f38e15ca1025683f0"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/v0.9.6/",
+      "file": "changelog__meko__v0.9.6.txt",
+      "words": 249,
+      "sha256": "d5248412ef54908c4b616cd7e24a318c00cfd5e7dec4fb7964592f1765e61d9c"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/v1.0.1/",
+      "file": "changelog__meko__v1.0.1.txt",
+      "words": 399,
+      "sha256": "8be5cfeaca891194c798c495ee727089133fe1771ed758a75f650b889e4c61f0"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/v1.0.2/",
+      "file": "changelog__meko__v1.0.2.txt",
+      "words": 501,
+      "sha256": "662fda0fea675afb4cc68edac9169b3e9612573d8fe59158e182bdd35ac52330"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/v1.0.3/",
+      "file": "changelog__meko__v1.0.3.txt",
+      "words": 274,
+      "sha256": "e49ec5f93ccc06d4d3635a65e822cc6112ea7717b98e51c48fc6330d4dc93227"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/v1.0.4/",
+      "file": "changelog__meko__v1.0.4.txt",
+      "words": 237,
+      "sha256": "d3bd1a7c0a269bd6edbe9915fa6b4fea1a83d4709fdb1606c741c04f8096c914"
+    },
+    {
+      "url": "https://docs.mekodata.ai/changelog/meko/v1.0.5/",
+      "file": "changelog__meko__v1.0.5.txt",
+      "words": 308,
+      "sha256": "321b2756bf05068f2a7a9392fa790d13969226a914c89914cd7fa3e7daa15060"
+    },
+    {
+      "url": "https://docs.mekodata.ai/contribute/",
+      "file": "contribute.txt",
+      "words": 330,
+      "sha256": "6539701d6112bce2e2c56c8c037a092569f4d5d46f3e2f603287cfe321805045"
+    },
+    {
+      "url": "https://docs.mekodata.ai/examples/",
+      "file": "examples.txt",
+      "words": 163,
+      "sha256": "ecb9bf2818d82755f07ef01d71a018e1e6b84de0c0aa3e8bd7a91a70f7bb13a5"
+    },
+    {
+      "url": "https://docs.mekodata.ai/examples/labs/",
+      "file": "examples__labs.txt",
+      "words": 399,
+      "sha256": "955a28ce3d9f858fa7b69bc8b280e24861750bb05bc5e443b13e92c9f241f4cd"
+    },
+    {
+      "url": "https://docs.mekodata.ai/examples/meko-enhances-teaming/",
+      "file": "examples__meko-enhances-teaming.txt",
+      "words": 1539,
+      "sha256": "ba80f796932da6fe760fac224f4bc749b4626b521b8d12982b12da720592eaaa"
+    },
+    {
+      "url": "https://docs.mekodata.ai/examples/trace-and-resume/",
+      "file": "examples__trace-and-resume.txt",
+      "words": 804,
+      "sha256": "9767bee648eda356b4ed3d7d913505abe366d5956ca7f2f850c423dfb4502567"
+    },
+    {
+      "url": "https://docs.mekodata.ai/guides/",
+      "file": "guides.txt",
+      "words": 94,
+      "sha256": "36f8b8ef64dc56bf7f9492a60a84f95640108f3e107c6fb0b57d5a283bb2c395"
+    },
+    {
+      "url": "https://docs.mekodata.ai/guides/database-access/",
+      "file": "guides__database-access.txt",
+      "words": 94,
+      "sha256": "36f8b8ef64dc56bf7f9492a60a84f95640108f3e107c6fb0b57d5a283bb2c395"
+    },
+    {
+      "url": "https://docs.mekodata.ai/guides/observability/",
+      "file": "guides__observability.txt",
+      "words": 887,
+      "sha256": "2b834979143d854e14b9355b9984cfee5a4d9857d6295f0c866f68c30f16c787"
+    },
+    {
+      "url": "https://docs.mekodata.ai/guides/where-to-store/",
+      "file": "guides__where-to-store.txt",
+      "words": 372,
+      "sha256": "01bac2a98bdeb0c8d25e031a2e9993a33f4d55409bbc4b2410dec5e58f1a0a7d"
+    },
+    {
+      "url": "https://docs.mekodata.ai/guides/workbench-lm/",
+      "file": "guides__workbench-lm.txt",
+      "words": 548,
+      "sha256": "14f7fee0ecb0005119ff222feed29c830116604ae5b6098cb640dbf51847b553"
+    },
+    {
+      "url": "https://docs.mekodata.ai/guides/working-with-artifacts/",
+      "file": "guides__working-with-artifacts.txt",
+      "words": 720,
+      "sha256": "2dd54b5aa8d84ffb04ed9521189cefff2b3e464f703949ba6defb065fdd7c1ba"
+    },
+    {
+      "url": "https://docs.mekodata.ai/guides/working-with-knowledge-bases/",
+      "file": "guides__working-with-knowledge-bases.txt",
+      "words": 647,
+      "sha256": "d14c31cbff67298497bbf93fb9b0795df40551bf488ec61b41dfa469df5686b7"
+    },
+    {
+      "url": "https://docs.mekodata.ai/guides/working-with-memory/",
+      "file": "guides__working-with-memory.txt",
+      "words": 983,
+      "sha256": "edce39b89013e290cfb4a351b7e8d11e60afad82ee3fc1b653a678f088f80aa3"
+    },
+    {
+      "url": "https://docs.mekodata.ai/integrations/",
+      "file": "integrations.txt",
+      "words": 591,
+      "sha256": "dc5ebc15a90c9d87929d648617f3db16ddfbd3974dbf2f546f7ca120d3b0aa91"
+    },
+    {
+      "url": "https://docs.mekodata.ai/integrations/connect-programmatically/",
+      "file": "integrations__connect-programmatically.txt",
+      "words": 110,
+      "sha256": "c7757f877560cf7f8adb9caeef8aa7f7e2370a42e3103a31035cb2d4da250695"
+    },
+    {
+      "url": "https://docs.mekodata.ai/integrations/connect-to-ai-agent/",
+      "file": "integrations__connect-to-ai-agent.txt",
+      "words": 2992,
+      "sha256": "b661a83ca9b39b01c7b4abd990bff73579e254c0145f6608a99b16e72a88e942"
+    },
+    {
+      "url": "https://docs.mekodata.ai/quick-start/",
+      "file": "quick-start.txt",
+      "words": 1436,
+      "sha256": "12ed2520dedbd5160921e1ad121af003a2bcc5c8b381eda2422cfa5d40100ad2"
+    },
+    {
+      "url": "https://docs.mekodata.ai/quick-start/explore-meko/",
+      "file": "quick-start__explore-meko.txt",
+      "words": 1267,
+      "sha256": "8397772fe4e412bb64e6a0372d9bfce600b0cb91e1c99cc521af780de0478874"
+    },
+    {
+      "url": "https://docs.mekodata.ai/reference/",
+      "file": "reference.txt",
+      "words": 64,
+      "sha256": "26ac428d38bf93705902eebb57bf8ba92fd50d02b1adb8a6f711496adbe8f17c"
+    },
+    {
+      "url": "https://docs.mekodata.ai/reference/api-keys/",
+      "file": "reference__api-keys.txt",
+      "words": 601,
+      "sha256": "634203a7276828dc34c391f3b899abe88a54ed40a13794d71c6f3cfa82aa7d6c"
+    },
+    {
+      "url": "https://docs.mekodata.ai/reference/datapack-api/",
+      "file": "reference__datapack-api.txt",
+      "words": 3040,
+      "sha256": "2911025c6469f8e9d3cec547773b2ab6a84eacd748f98b8eaf728365b256f47c"
+    },
+    {
+      "url": "https://docs.mekodata.ai/reference/mcp-server/",
+      "file": "reference__mcp-server.txt",
+      "words": 2047,
+      "sha256": "2635c31ece7f0854739590245c71fd82aa0dbde5315bd07e6465f83c84bead43"
+    },
+    {
+      "url": "https://docs.mekodata.ai/reference/meko-cli/",
+      "file": "reference__meko-cli.txt",
+      "words": 64,
+      "sha256": "26ac428d38bf93705902eebb57bf8ba92fd50d02b1adb8a6f711496adbe8f17c"
+    },
+    {
+      "url": "https://docs.mekodata.ai/tags/",
+      "file": "tags.txt",
+      "words": 1,
+      "sha256": "1331275bc537b4c2bf1e46f7275677967515342e30b572e6852fa6f51b831fe8"
+    },
+    {
+      "url": "https://docs.mekodata.ai/troubleshooting/",
+      "file": "troubleshooting.txt",
+      "words": 1605,
+      "sha256": "e4d35bab52aaed71de42f9e81ea66fc500f984162bffee5101d38a1c064f6c07"
+    },
+    {
+      "url": "https://docs.mekodata.ai/whats-new/",
+      "file": "whats-new.txt",
+      "words": 339,
+      "sha256": "aeef8486bf88df3b939ec34ba060ce5e683da7626e3e238c3f9be478ab728fee"
+    }
+  ],
+  "additional_references": [
+    {
+      "url": "https://docs.mekodata.ai/llms.txt",
+      "sha256": "352da28b3cefb2345a3463c461741b39c3c25475a7f3aa845f11ff2927b4a2f2",
+      "review": "read"
+    },
+    {
+      "url": "https://docs.mekodata.ai/downloads/datapack-api.openapi.yaml",
+      "sha256": "caa5d3f0a0a05e4f8d023d21b1fcc5e78830a9496d989c99ac9c16b59916cae9",
+      "review": "inspected endpoints and component schemas"
+    }
+  ],
+  "failed_navigation_targets": [
+    {
+      "url": "https://docs.mekodata.ai/contribute/architecture/",
+      "error": "404 Client Error: Not Found for url: https://docs.mekodata.ai/contribute/architecture/"
+    },
+    {
+      "url": "https://docs.mekodata.ai/contribute/architecture/core-concepts/traces/",
+      "error": "404 Client Error: Not Found for url: https://docs.mekodata.ai/contribute/architecture/core-concepts/traces/"
+    },
+    {
+      "url": "https://docs.mekodata.ai/contribute/guides/workbench-lm/",
+      "error": "404 Client Error: Not Found for url: https://docs.mekodata.ai/contribute/guides/workbench-lm/"
+    },
+    {
+      "url": "https://docs.mekodata.ai/contribute/integrations/",
+      "error": "404 Client Error: Not Found for url: https://docs.mekodata.ai/contribute/integrations/"
+    },
+    {
+      "url": "https://docs.mekodata.ai/contribute/quick-start/",
+      "error": "404 Client Error: Not Found for url: https://docs.mekodata.ai/contribute/quick-start/"
+    },
+    {
+      "url": "https://docs.mekodata.ai/quick-start/guides/working-with-artifacts/",
+      "error": "404 Client Error: Not Found for url: https://docs.mekodata.ai/quick-start/guides/working-with-artifacts/"
+    }
+  ]
+}
