@@ -130,7 +130,7 @@ async def test_generated_files_real_bytes_download_ownership_and_disconnect(prod
 
         async def ainvoke(self, messages):
             if messages[-1].type == "human":
-                return AIMessage(
+                reply = AIMessage(
                     content="",
                     tool_calls=[
                         {
@@ -161,6 +161,9 @@ async def test_generated_files_real_bytes_download_ownership_and_disconnect(prod
                         },
                     ],
                 )
+                # Real models can request the same file twice in one response.
+                reply.tool_calls.append({**reply.tool_calls[0], "id": "pptx-repeat"})
+                return reply
             return AIMessage(content="Files created. Download using the returned URLs.")
 
     args = dict(
@@ -175,7 +178,9 @@ async def test_generated_files_real_bytes_download_ownership_and_disconnect(prod
     async for db in app.dependency_overrides[get_db]():
         run = await run_agent(db, **args)
         assert run.status == "completed", run.error
-        assert [event["status"] for event in run.tools] == ["completed", "completed"], run.tools
+        assert [event["status"] for event in run.tools] == ["completed"] * 3, run.tools
+        assert run.tools[-1]["reused"] is True
+        assert run.tools[0]["result"] == run.tools[-1]["result"]
         files = [json.loads(event["result"])["file"] for event in run.tools]
         for file in files:
             response = await client.get("/api/agent/files/" + file["id"], headers=headers)

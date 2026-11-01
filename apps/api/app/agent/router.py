@@ -15,7 +15,12 @@ from app.memory.scopes import owned_employee
 router = APIRouter(prefix="/api/agent", tags=["agent"])
 
 
-@router.get("/files/{file_id}")
+@router.get(
+    "/files/{file_id}", response_class=Response,
+    responses={200: {"content": {"application/octet-stream": {
+        "schema": {"type": "string", "format": "binary"},
+    }}}},
+)
 async def download_file(
     file_id: UUID,
     db: AsyncSession = Depends(get_db),

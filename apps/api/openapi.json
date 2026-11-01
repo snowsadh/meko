@@ -1620,6 +1620,55 @@
         }
       }
     },
+    "/api/agent/files/{file_id}": {
+      "get": {
+        "tags": [
+          "agent"
+        ],
+        "summary": "Download File",
+        "operationId": "download_file_api_agent_files__file_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "File Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/agent/message": {
       "post": {
         "tags": [
@@ -2949,21 +2998,44 @@
         "operationId": "slack_oauth_callback_api_slack_oauth_callback_get",
         "parameters": [
           {
-            "name": "code",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Code"
-            }
-          },
-          {
             "name": "state",
             "in": "query",
             "required": true,
             "schema": {
               "type": "string",
               "title": "State"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code"
+            }
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Error"
             }
           }
         ],
@@ -3233,6 +3305,259 @@
           }
         }
       }
+    },
+    "/api/organizations/{org_id}/slack/routing/preview": {
+      "post": {
+        "tags": [
+          "slack-routing"
+        ],
+        "summary": "Preview",
+        "operationId": "preview_api_organizations__org_id__slack_routing_preview_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutingDecision"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/organizations/{org_id}/slack/routing": {
+      "get": {
+        "tags": [
+          "slack-routing"
+        ],
+        "summary": "Chunks",
+        "operationId": "chunks_api_organizations__org_id__slack_routing_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org Id"
+            }
+          },
+          {
+            "name": "employee_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Employee Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChunkResponse"
+                  },
+                  "title": "Response Chunks Api Organizations  Org Id  Slack Routing Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/organizations/{org_id}/slack/routing/{chunk_id}/retry": {
+      "post": {
+        "tags": [
+          "slack-routing"
+        ],
+        "summary": "Retry",
+        "operationId": "retry_api_organizations__org_id__slack_routing__chunk_id__retry_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org Id"
+            }
+          },
+          {
+            "name": "chunk_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Chunk Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChunkResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/organizations/{org_id}/slack/setup": {
+      "get": {
+        "tags": [
+          "slack-routing"
+        ],
+        "summary": "Setup",
+        "operationId": "setup_api_organizations__org_id__slack_setup_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "org_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Org Id"
+            }
+          },
+          {
+            "name": "employee_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Employee Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3455,6 +3780,11 @@
             "type": "boolean",
             "title": "Use Meko",
             "default": true
+          },
+          "allow_tools": {
+            "type": "boolean",
+            "title": "Allow Tools",
+            "default": false
           }
         },
         "type": "object",
@@ -3647,6 +3977,105 @@
           "channel_id"
         ],
         "title": "ChannelAssignmentResponse"
+      },
+      "ChunkResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "channel_id": {
+            "type": "string",
+            "title": "Channel Id"
+          },
+          "thread_ts": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thread Ts"
+          },
+          "private": {
+            "type": "boolean",
+            "title": "Private"
+          },
+          "messages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "company": {
+            "type": "boolean",
+            "title": "Company"
+          },
+          "employee_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Employee Ids"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "deliveries": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Deliveries"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "channel_id",
+          "thread_ts",
+          "private",
+          "messages",
+          "status",
+          "company",
+          "employee_ids",
+          "reason",
+          "deliveries",
+          "error",
+          "created_at"
+        ],
+        "title": "ChunkResponse"
       },
       "CreateChannelAssignmentRequest": {
         "properties": {
@@ -4476,8 +4905,9 @@
         "properties": {
           "credential": {
             "type": "string",
-            "minLength": 1,
-            "title": "Credential"
+            "maxLength": 16000,
+            "title": "Credential",
+            "default": ""
           },
           "auth_type": {
             "type": "string",
@@ -4516,9 +4946,6 @@
           }
         },
         "type": "object",
-        "required": [
-          "credential"
-        ],
         "title": "McpConnectionCreate"
       },
       "McpConnectionList": {
@@ -5066,6 +5493,28 @@
             ],
             "title": "Memory Setup Error"
           },
+          "slack_team_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slack Team Id"
+          },
+          "slack_team_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slack Team Name"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -5080,6 +5529,38 @@
           "created_at"
         ],
         "title": "OrganizationResponse"
+      },
+      "PreviewRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 16000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "employee_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employee Id"
+          },
+          "private": {
+            "type": "boolean",
+            "title": "Private",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "PreviewRequest"
       },
       "RegisterRequest": {
         "properties": {
@@ -5104,6 +5585,37 @@
           "name"
         ],
         "title": "RegisterRequest"
+      },
+      "RoutingDecision": {
+        "properties": {
+          "company": {
+            "type": "boolean",
+            "title": "Company"
+          },
+          "employee_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Employee Ids"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "company",
+          "employee_ids",
+          "reason"
+        ],
+        "title": "RoutingDecision"
       },
       "ShareRequest": {
         "properties": {

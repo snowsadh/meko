@@ -298,7 +298,7 @@ export interface McpConnectionList {
 }
 
 export interface McpConnectionCreate {
-  credential: string;
+  credential?: string;
   auth_type?: string;
   server_url?: string;
   scopes?: string[];
@@ -808,7 +808,7 @@ export interface AgentRun {
   platform: string;
   thread_key: string;
   recalled: MemorySearchResultResponse[];
-  tools: {name: string; arguments: Record<string, unknown>; status: string; result?: string}[];
+  tools: {name: string; arguments: Record<string, unknown>; status: string; result?: string; reused?: boolean}[];
   status: string;
   delivery_status: string;
   capture_status: string;

@@ -244,6 +244,7 @@ async def run_agent(
             messages.append(SystemMessage(content="Unavailable services: " + json.dumps(run.tools)))
         lookup = {item.name: item for item in tools}
         bound = model.bind_tools(tools) if tools else model
+        file_results = {}
         for _ in range(settings.agent_max_tool_rounds):
             reply = await bound.ainvoke(messages)
             messages.append(reply)
@@ -256,13 +257,23 @@ async def run_agent(
                 event = {"name": call["name"], "arguments": call["args"], "status": "running"}
                 if call["name"] not in lookup:
                     raise HTTPException(502, "The model requested a tool it was not granted.")
-                try:
-                    result = await lookup[call["name"]].ainvoke(call["args"])
-                    output = result if isinstance(result, str) else json.dumps(result, default=str)
-                    event.update(status="completed", result=output[:20000])
-                except Exception:
-                    output = "Tool failed. Do not claim it succeeded."
-                    event.update(status="failed", result=output)
+                file_key = (
+                    (call["name"], json.dumps(call["args"], sort_keys=True))
+                    if call["name"] in {"create_presentation", "create_chart"} else None
+                )
+                if file_key is not None and file_key in file_results:
+                    output, status = file_results[file_key]
+                    event.update(status=status, result=output[:20000], reused=True)
+                else:
+                    try:
+                        result = await lookup[call["name"]].ainvoke(call["args"])
+                        output = result if isinstance(result, str) else json.dumps(result, default=str)
+                        event.update(status="completed", result=output[:20000])
+                    except Exception:
+                        output = "Tool failed. Do not claim it succeeded."
+                        event.update(status="failed", result=output)
+                    if file_key is not None:
+                        file_results[file_key] = (output, event["status"])
                 run.tools = [*run.tools, event]
                 await db.commit()
                 messages.append(ToolMessage(content=output, tool_call_id=call["id"]))

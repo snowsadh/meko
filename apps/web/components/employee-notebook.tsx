@@ -496,6 +496,7 @@ export function EmployeeActivity({
                     <li key={index} className="text-sm">
                       <p className="font-medium">
                         {tool.name} · {tool.status}
+                        {tool.reused ? " · reused existing result" : ""}
                       </p>
                       <pre className="mt-1 overflow-x-auto whitespace-pre-wrap break-words text-xs text-muted-foreground">
                         {JSON.stringify(tool.arguments, null, 2)}

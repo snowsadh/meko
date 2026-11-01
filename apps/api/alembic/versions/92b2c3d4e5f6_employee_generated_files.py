@@ -1,7 +1,8 @@
 """Store generated files with their originating employee run."""
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 revision = "92b2c3d4e5f6"
 down_revision = "6f09e54a2b10"

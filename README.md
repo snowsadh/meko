@@ -76,7 +76,7 @@ TEST_DATABASE_URL=postgresql+asyncpg://yugabyte:yugabyte@localhost:5433/openhuma
 
 `scripts/check_meko.py` is a live, synthetic-data check. It reuses two demo datapacks because deleted datapacks do not restore creation-quota slots. Run it only with an approved account and available quota. Stop on quota errors; do not repeatedly retry them. On 2026-11-01, conversation saving, automatic extraction and fresh-task recall passed against the newly authorised account through the local application API.
 
-The employee page's **Work and context** preview can compare Meko enabled/disabled. Disabled previews bypass Meko and old thread history; connected external work tools are disabled in the preview.
+The employee page's **Work and context** preview can compare Meko enabled/disabled. Disabling saved knowledge bypasses Meko and old thread history. Connected work tools are controlled separately by the explicit checkbox, which is off by default.
 
 `scripts/check_dashboard_auth.py` uses Playwright against the running app to check missing-cookie recovery, invalid saved sessions, cookie-only sessions and fresh sign-in. Supply an existing test account through `OPENHUMAN_TEST_EMAIL` and `OPENHUMAN_TEST_PASSWORD`, then run `uv run --project apps/api --with playwright python scripts/check_dashboard_auth.py`. Install Playwright's Chromium first if needed. The check makes no Meko calls and does not reset a database.
 
