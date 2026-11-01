@@ -222,6 +222,33 @@ async def test_intake_dedup_thread_replies_and_uncertain_delivery(product):
 
 
 @pytest.mark.asyncio
+async def test_channel_access_list_blocks_intake_and_queued_delivery(product, monkeypatch):
+    client, _, model = product
+    _, org, support, _ = await setup_company(client)
+    await connect(org, support)
+    SlackClient.posts, SlackClient.fail = [], False
+    gateway = SlackGateway(build.async_session_factory, SlackClient)
+    monkeypatch.setattr(settings, "slack_allowed_channel_ids", ["CTEST"])
+    await gateway.process("support", event("<@USUPPORT> Outside", kind="app_mention"))
+    async with build.async_session_factory() as db:
+        assert not (await db.scalars(select(SlackMessage))).all()
+        assert not (await db.scalars(select(AgentRun))).all()
+    await gateway.process(
+        "support", event("<@USUPPORT> Allowed", kind="app_mention", channel="CTEST")
+    )
+    async with build.async_session_factory() as db:
+        run = await db.scalar(select(AgentRun))
+        identifier = run.id
+        assert (await db.scalar(select(SlackMessage))).channel_id == "CTEST"
+    monkeypatch.setattr(settings, "slack_allowed_channel_ids", ["COTHER"])
+    await gateway.reply(identifier)
+    async with build.async_session_factory() as db:
+        run = await db.get(AgentRun, identifier)
+        assert run.status == "cancelled" and run.delivery_status == "not_sent"
+    assert not model.messages and not SlackClient.posts
+
+
+@pytest.mark.asyncio
 async def test_paused_employee_and_private_roster(product):
     client, _, model = product
     headers, org, support, hr = await setup_company(client)

@@ -158,6 +158,8 @@ class SlackGateway:
             return
         if not event["text"].strip() or len(event["text"]) > 40000:
             return
+        if settings.slack_allowed_channel_ids and event["channel"] not in settings.slack_allowed_channel_ids:
+            return
         async with self.session_factory() as db:
             statement = select(Employee).where(
                 Employee.slack_team_id == payload.get("team_id"),
@@ -224,6 +226,11 @@ class SlackGateway:
         async with self.session_factory() as db:
             run = await db.get(AgentRun, run_id)
             if run is None:
+                return
+            if settings.slack_allowed_channel_ids and run.slack_channel_id not in settings.slack_allowed_channel_ids:
+                run.status, run.delivery_status = "cancelled", "not_sent"
+                run.error = "This channel is outside the configured Slack access list."
+                await db.commit()
                 return
             employee = await db.get(Employee, run.employee_id)
             if not employee or employee.status != "active" or not employee.slack_token_enc:

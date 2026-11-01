@@ -23,11 +23,13 @@ Slack stays off until its app credentials are configured. `.env.example` lists t
 2. Set `SLACK_OAUTH_REDIRECT_URI` to the backend's public HTTPS URL ending in `/api/slack/oauth/callback`. Register that exact URL under each Slack app's OAuth & Permissions. Local development needs an HTTPS tunnel or a deployed backend for this callback. [Slack requires HTTPS for OAuth redirects](https://docs.slack.dev/authentication/installing-with-oauth/).
 3. Subscribe to bot events `app_mention`, `message.channels`, `message.groups`, `message.im`, and `message.mpim`. Requested bot scopes are `app_mentions:read`, `channels:history`, `groups:history`, `chat:write`, `im:history`, `im:write`, and `mpim:history`.
 4. Recreate the backend after environment changes. In the employee's configuration page, choose **Connect Slack**, finish Slack's approval, and invite that employee to the intended channels. One company uses one Slack workspace; fixed role apps each represent one employee in that workspace.
-5. Set `GATEWAY_ENABLED=true` and recreate the backend when ready to listen and reply. Keep `SLACK_MEMORY_ENABLED=false` while the Meko account lacks conversation quota. Enable it after valid product scopes and quota are available.
+5. Set `GATEWAY_ENABLED=true` and recreate the backend when ready to listen and reply. Set `SLACK_MEMORY_ENABLED=true` after confirming that the intended product datapacks accept conversation saves. Leave it false to inspect routing decisions without automatic memory delivery.
 
 An app-level token opens the event connection; installation supplies the separate bot token used to reply. Socket Mode does not require a public event webhook. The collapsed **Work and context** section shows app setup, routing previews, original chat, decisions and actual destination status. A routing preview uses OpenAI and writes nothing to Meko.
 
 For local OAuth, run `python3 scripts/slack_callback_proxy.py` and, in another terminal, `cloudflared tunnel --url http://127.0.0.1:8010`. Register the printed HTTPS URL plus `/api/slack/oauth/callback` in Slack and set the same value in `.env`. This proxy exposes only that callback; other paths return 404. Its check is `python3 scripts/test_slack_callback_proxy.py`. The temporary URL changes when the tunnel restarts. Docker disables request access logs so OAuth codes and state are not recorded in request URLs.
+
+For a bounded Slack test, set `SLACK_ALLOWED_CHANNEL_IDS=["C_YOUR_TEST_CHANNEL_ID"]`. Messages outside this list are ignored, and queued replies outside it are cancelled. Leave it empty to use all channels the installed bots can see. Recreate the backend after changing it.
 
 ## How memory works
 
@@ -60,7 +62,7 @@ docker compose exec -T database bin/ysqlsh -h database -U yugabyte -d yugabyte -
 TEST_DATABASE_URL=postgresql+asyncpg://yugabyte:yugabyte@localhost:5433/openhuman_test uv run --project apps/api pytest apps/api/tests -q
 ```
 
-`scripts/check_meko.py` is a live, synthetic-data check. It reuses two demo datapacks because deleted datapacks do not restore creation-quota slots. Run it only with an approved account and available quota. Conversation capture was blocked by the current account's lifetime request limit; do not repeatedly retry it.
+`scripts/check_meko.py` is a live, synthetic-data check. It reuses two demo datapacks because deleted datapacks do not restore creation-quota slots. Run it only with an approved account and available quota. Stop on quota errors; do not repeatedly retry them. On 2026-11-01, conversation saving, automatic extraction and fresh-task recall passed against the newly authorised account through the local application API.
 
 The employee page's **Work and context** preview can compare Meko enabled/disabled. Disabled previews bypass Meko and old thread history; connected external work tools are disabled in the preview.
 
