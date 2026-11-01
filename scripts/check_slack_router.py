@@ -78,6 +78,22 @@ async def main():
             set(),
         ),
         (
+            "addressed greeting",
+            "<@U_TEST_SUPPORT> Hey, who are you",
+            False,
+            [],
+            False,
+            set(),
+        ),
+        (
+            "baseline introduction",
+            "I'm Alex, your Customer Support Specialist for Atlas. How can I assist you today?",
+            False,
+            [],
+            False,
+            set(),
+        ),
+        (
             "shared and roles",
             "Approved company-wide policy: we now support only paid Atlas accounts. Alex must update support replies; Alison must update new-hire training. Everyone else should know too.",
             False,

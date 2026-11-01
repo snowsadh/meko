@@ -72,6 +72,7 @@ async def choose_destinations(org, employees, messages, *, private=False, model=
             base_url=settings.openai_base_url or None,
             timeout=60,
             max_retries=0,
+            temperature=0,
         )
     prompt = (
         "Choose memory destinations for this company's Slack chat chunk. "
@@ -85,7 +86,11 @@ async def choose_destinations(org, employees, messages, *, private=False, model=
         "When named employees receive concrete follow-up work, include those employees even if "
         "the chunk also goes to company knowledge. Each destination receives the ENTIRE chunk. "
         "There is no redaction step: any sensitive detail in a chunk rules out company knowledge. "
-        "Use neither for greetings, noise, guesses or unrelated material. Never share passwords, "
+        "Use neither for greetings, noise, guesses or unrelated material. "
+        "A mention, a request for help, or 'who are you?' without reusable work context "
+        "must use company=false and employee_keys=[]. Addressing an employee alone is not "
+        "a reason to save the chunk. An employee repeating its baseline role or capabilities "
+        "also adds no reusable context and must use neither. Never share passwords, "
         "tokens, personal personnel matters or confidential customer details company-wide. "
         "An AI suggestion alone does not establish company policy. "
         "Use only the employee keys supplied. Private direct/group messages cannot go company-wide "
