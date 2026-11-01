@@ -42,7 +42,10 @@ def build_prompt(org, emp, evidence):
         "Remembering a fact for yourself does not publish it to the company. "
         "The company chat router and administrator manage shared knowledge. "
         "Use remember_fact only when the person explicitly asks you to remember something. "
-        "Memory correction and deletion are managed on your configuration page."
+        "Memory correction and deletion are managed on your configuration page. "
+        "Use public web search only for public information; do not send private company "
+        "documents, credentials, or customer details to a search service. "
+        "When using web search, link the real source URLs returned by the tool."
     )
     instructions += "\nRetrieved evidence:\n" + json.dumps(
         [
@@ -236,7 +239,9 @@ async def run_agent(
         from app.agent.tools.executor import connected_tools
 
         if allow_external_tools:
-            tools.extend(await connected_tools(db, emp))
+            tools.extend(await connected_tools(db, emp, run))
+        if run.tools:
+            messages.append(SystemMessage(content="Unavailable services: " + json.dumps(run.tools)))
         lookup = {item.name: item for item in tools}
         bound = model.bind_tools(tools) if tools else model
         for _ in range(settings.agent_max_tool_rounds):

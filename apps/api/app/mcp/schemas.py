@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class McpConnectionCreate(BaseModel):
-    credential: str = Field(min_length=1)
+    credential: str = Field(default="", max_length=16000)
     auth_type: str = "api_key_header"
     server_url: str | None = None
     scopes: list[str] | None = None

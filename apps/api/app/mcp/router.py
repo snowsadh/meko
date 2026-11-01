@@ -17,10 +17,20 @@ from app.mcp.schemas import (
     McpConnectorRead,
 )
 from app.organizations.models import Organization
+from app.agent.tools.executor import remote_tools
+from app.employees.templates import get_template
 
 router = APIRouter(prefix="/api/organizations/{org_id}", tags=["mcp"])
 
 CONNECTOR_REGISTRY = [
+    {
+        "slug": "web_search",
+        "name": "Exa Web Search",
+        "description": "Search public web pages through Exa MCP. No key needed; service rate limits apply.",
+        "auth_type": "none",
+        "auth_types": ["none"],
+        "requires_custom_server_url": False,
+    },
     {
         "slug": "gmail",
         "name": "Gmail",
@@ -80,7 +90,7 @@ CONNECTOR_REGISTRY = [
     {
         "slug": "visualization",
         "name": "Visualization",
-        "description": "Generate charts and diagrams.",
+        "description": "Create downloadable SVG bar charts from supplied data.",
         "auth_type": "none",
         "auth_types": ["none"],
         "requires_custom_server_url": False,
@@ -96,12 +106,12 @@ CONNECTOR_REGISTRY = [
     {
         "slug": "pitchdeck",
         "name": "Pitch Deck Generator",
-        "description": "Create presentation assets without external auth.",
+        "description": "Create editable PowerPoint files with speaker notes. No extra account needed.",
         "auth_type": "none",
         "auth_types": ["none"],
         "requires_custom_server_url": False,
     },
-] + [{"slug":"n8n", "name":"n8n workflows", "description":"Tools from your workflow service.", "auth_type":"pat_bearer", "auth_types":["pat_bearer"], "requires_custom_server_url":True}]
+]
 
 
 async def _access(db: AsyncSession, org_id: UUID, employee_id: UUID, user_id: UUID) -> None:
@@ -158,10 +168,22 @@ async def list_connections(org_id: UUID, employee_id: UUID, db: AsyncSession = D
 async def connect(org_id: UUID, employee_id: UUID, connector_slug: str, data: McpConnectionCreate,
                   db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     await _access(db, org_id, employee_id, current_user.id)
-    if connector_slug != "n8n" or not data.server_url:
-        raise HTTPException(422, "Choose an n8n service and provide its HTTPS URL.")
-    from app.core.connections import validate_service_url
-    await validate_service_url(data.server_url)
+    native = connector_slug in {"pitchdeck", "visualization"}
+    if connector_slug not in {"n8n", "web_search", "pitchdeck", "visualization"}:
+        raise HTTPException(422, "This integration is not implemented yet.")
+    employee = await db.get(Employee, employee_id)
+    allowed = get_template(employee.employee_type or "general").allowed_mcp_servers
+    if "*" not in allowed and connector_slug not in allowed:
+        raise HTTPException(422, "This tool is not enabled for this employee role.")
+    if connector_slug == "n8n" and (not data.server_url or not data.credential.strip()):
+        raise HTTPException(422, "Provide the n8n HTTPS URL and access token.")
+    try:
+        if not native:
+            await remote_tools(connector_slug, server_url=data.server_url, credential=data.credential)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(502, "Could not discover tools from this service. No connection was saved.") from exc
     employee_filter = McpConnection.employee_id.is_(None) if data.org_wide else (McpConnection.employee_id == employee_id)
     existing = await db.scalar(
         select(McpConnection).where(
@@ -174,8 +196,10 @@ async def connect(org_id: UUID, employee_id: UUID, connector_slug: str, data: Mc
     if existing is not None:
         return McpConnectionRead.model_validate(existing)
     connection = McpConnection(org_id=org_id, employee_id=None if data.org_wide else employee_id,
-                               connector_slug=connector_slug, auth_type=data.auth_type,
-                               credentials_enc=encrypt_token(data.credential), server_url=data.server_url,
+                               connector_slug=connector_slug,
+                               auth_type="pat_bearer" if connector_slug == "n8n" else "none",
+                               credentials_enc=encrypt_token(data.credential) if connector_slug == "n8n" else None,
+                               server_url=data.server_url if connector_slug == "n8n" else None,
                                scopes=data.scopes, connected_by_user_id=current_user.id)
     db.add(connection)
     await db.commit()

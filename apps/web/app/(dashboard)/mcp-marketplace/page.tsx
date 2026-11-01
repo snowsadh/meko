@@ -69,6 +69,21 @@ interface McpServer {
 
 const MCP_SERVERS: McpServer[] = [
   {
+    id: "web_search",
+    name: "Exa Web Search",
+    description: "Search public web pages through Exa MCP. No API key needed; service rate limits apply.",
+    category: "AI & Search",
+    authType: "None",
+    url: "https://mcp.exa.ai/mcp",
+    icon: Globe,
+    iconColor: "from-slate-700 to-slate-900",
+    author: "Exa",
+    rating: 0,
+    tools: ["web_search_exa"],
+    resources: [],
+    mcpJsonConfig: JSON.stringify({ mcpServers: { exa: { url: "https://mcp.exa.ai/mcp?tools=web_search_exa" } } }, null, 2),
+  },
+  {
     id: "gmail",
     name: "Gmail / Google Workspace",
     description: "Search threads, read messages, create drafts, and manage labels across any Google Workspace account.",

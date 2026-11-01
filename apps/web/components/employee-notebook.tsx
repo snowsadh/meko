@@ -22,6 +22,16 @@ const message = (error: unknown) =>
     : "The operation could not be completed.";
 const factText = (fact: MemoryFact) => fact.data || fact.memory || "";
 
+function ToolDownload({ result }: { result?: string }) {
+  try {
+    const file = JSON.parse(result || "{}").file;
+    if (!file || typeof file.filename !== "string" || !/^[0-9a-f-]{36}$/i.test(file.id)) return null;
+    return <a className="mt-2 inline-block text-sm underline" href={`/files/${file.id}`}>Download {file.filename}</a>;
+  } catch {
+    return null;
+  }
+}
+
 export function EmployeeMemory({
   orgId,
   employeeId,
@@ -290,6 +300,7 @@ export function EmployeeActivity({
   const client = useQueryClient();
   const [input, setInput] = useState("");
   const [useMemory, setUseMemory] = useState(true);
+  const [allowTools, setAllowTools] = useState(false);
   const [busy, setBusy] = useState(false);
   const {
     data: runs = [],
@@ -317,8 +328,8 @@ export function EmployeeActivity({
           Test this employee
         </summary>
         <p className="mt-2 text-sm text-muted-foreground">
-          Try a fresh request before using Slack. Connected work tools are
-          disabled in this preview.
+          Try a fresh request before using Slack. Enable connected tools below
+          when you want this request to perform real work.
         </p>
         <form
           className="mt-4 space-y-3"
@@ -333,6 +344,7 @@ export function EmployeeActivity({
                   employee_id: employeeId,
                   message: input,
                   use_meko: useMemory,
+                  allow_tools: allowTools,
                   request_key: crypto.randomUUID(),
                 }),
               });
@@ -362,6 +374,14 @@ export function EmployeeActivity({
               onChange={(e) => setUseMemory(e.target.checked)}
             />
             Use saved knowledge
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={allowTools}
+              onChange={(e) => setAllowTools(e.target.checked)}
+            />
+            Allow connected tools for this request
           </label>
           <p className="text-xs text-muted-foreground">
             Switch off for the same-task comparison. That run bypasses memory
@@ -481,6 +501,7 @@ export function EmployeeActivity({
                         {JSON.stringify(tool.arguments, null, 2)}
                         {tool.result ? `\n${tool.result}` : ""}
                       </pre>
+                      {tool.status === "completed" && <ToolDownload result={tool.result} />}
                     </li>
                   ))}
                 </ul>

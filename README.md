@@ -35,6 +35,14 @@ For a bounded Slack test, set `SLACK_ALLOWED_CHANNEL_IDS=["C_YOUR_TEST_CHANNEL_I
 
 If you cannot edit an existing Slack app, its owner can add you as a collaborator, or you can [create your own app](https://api.slack.com/apps?new_app=1). To fill its settings in one paste, run `python3 scripts/slack_manifest.py --name Alex --callback https://YOUR_TUNNEL/api/slack/oauth/callback`, then choose **From a manifest**, select **JSON**, and paste the output. This configures the required bot permissions, events, direct messages and Socket Mode. From **Basic Information**, copy the Client ID and Client Secret; generate an app-level token with `connections:write`. Set the three `SLACK_BOT_SUPPORT_*` values in `.env`, recreate the backend, and use **Add Alex to Slack** on the employee page. Repeat with the other roles' names and environment prefixes only when needed. See [Slack's manifest guide](https://docs.slack.dev/app-manifests/configuring-apps-with-app-manifests/).
 
+## Employee actions
+
+On an employee's page, connect **Exa Web Search**, **Pitch Deck Generator**, or **Visualization Charts**. These need no extra credentials. Search uses [Exa's public MCP service](https://exa.ai/docs/get-started/exa-mcp), whose service rate limits apply. Presentations and bar charts are generated locally; they do not use Canva or Gamma.
+
+Ask in Slack for a PowerPoint, a chart from supplied numbers, or public web research. The website's **Work and context → Test this employee** also supports these actions when **Allow connected tools for this request** is checked. It is off by default. Successful file tools return a download link; sign in to the company account to download. Files are stored privately with the originating run, not published to company knowledge automatically.
+
+n8n connections require the real HTTPS MCP endpoint and token, and tool discovery must succeed before saving. Other catalogue entries are not implemented connections yet.
+
 ## How memory works
 
 - One company datapack holds shared knowledge; each AI employee has a separate datapack for private documents and memory.

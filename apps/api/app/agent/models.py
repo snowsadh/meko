@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, Uuid, func
+from sqlalchemy import DateTime, ForeignKey, LargeBinary, String, Text, Uuid, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -33,4 +33,18 @@ class AgentRun(Base):
     status: Mapped[str] = mapped_column(String(20), default="running")
     capture_status: Mapped[str] = mapped_column(String(20), default="pending")
     error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AgentFile(Base):
+    __tablename__ = "agent_files"
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    run_id: Mapped[UUID] = mapped_column(
+        Uuid, ForeignKey("agent_runs.id", ondelete="CASCADE"), index=True
+    )
+    filename: Mapped[str] = mapped_column(String(180))
+    media_type: Mapped[str] = mapped_column(String(120))
+    content: Mapped[bytes] = mapped_column(LargeBinary)
+    sha256: Mapped[str] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

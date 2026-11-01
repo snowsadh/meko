@@ -35,6 +35,8 @@ services:
       start_period: 2m
   web:
     restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://backend:8000
     build:
       context: .
       dockerfile: apps/web/Dockerfile
