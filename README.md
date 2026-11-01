@@ -4,6 +4,18 @@ OpenHuman lets teams create AI coworkers that live inside Slack or Discord. Each
 
 Built by **tungtungtungsahur** for **hackCBS 9.0 · Meko Track A**.
 
+## Architecture
+
+![OpenHuman architecture: dashboard, AI employees, connected tools, and Meko with one common company datapack and separate employee datapacks](docs/assets/architecture.png)
+
+A **datapack** is Meko's container for conversations, memories and documents. Each employee reads its own datapack and the common company datapack. The Atlas names above illustrate the layout; employee datapacks are created during onboarding.
+
+## What you can build
+
+- **Customer support:** give Alex product guides and runbooks so he can explain the right fix, find the escalation owner and draft a customer reply.
+- **HR:** give Allison the company handbook and private leave records so she can answer policy questions and check remaining leave.
+- **Sales:** give Marcus your product brief so he can research prospects and turn the findings into a presentation.
+
 ## What you can do
 
 - Give each employee the documents relevant to their job.
@@ -45,9 +57,9 @@ You need **Git, Python 3, Docker with Compose**, an **OpenAI API key** and a **M
 
 Website chat works without Slack. To use employees in your workspace, follow the [Slack setup guide](docs/setup.md#slack-setup), connect the employee from its page, and invite it to a channel. It starts listening automatically.
 
-## Where Meko fits
+## How it works
 
-A **datapack** is Meko's container for conversations, memories and documents. OpenHuman creates one for shared company knowledge and a separate one for each employee. Before answering, an employee retrieves its own context and the company's shared knowledge.
+Company setup comes first: add shared documents, then onboard employees from job templates and give each one its own instructions and documents. When a message arrives, the employee retrieves relevant company knowledge and its private context before OpenAI prepares the reply or calls an enabled tool.
 
 For new Slack conversations, a shared router asks OpenAI where each chat chunk belongs: company knowledge, selected employees, both, or neither. Meko extracts durable facts from conversations accepted into employee memory. The website shows sources, routing decisions and save status.
 
