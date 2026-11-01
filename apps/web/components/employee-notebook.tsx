@@ -325,11 +325,11 @@ export function EmployeeActivity({
       </div>
       <details className="rounded-xl border p-4">
         <summary className="cursor-pointer text-sm font-medium">
-          Test this employee
+          Chat
         </summary>
         <p className="mt-2 text-sm text-muted-foreground">
-          Try a fresh request before using Slack. Enable connected tools below
-          when you want this request to perform real work.
+          Message this employee. Choose whether to use saved knowledge and
+          connected tools.
         </p>
         <form
           className="mt-4 space-y-3"
@@ -359,7 +359,7 @@ export function EmployeeActivity({
             }
           }}
         >
-          <Label htmlFor="test-employee-request">Request</Label>
+          <Label htmlFor="test-employee-request">Message</Label>
           <Textarea
             id="test-employee-request"
             required
@@ -384,11 +384,10 @@ export function EmployeeActivity({
             Allow connected tools for this request
           </label>
           <p className="text-xs text-muted-foreground">
-            Switch off for the same-task comparison. That run bypasses memory
-            reads and writes.
+            These choices apply to messages sent here.
           </p>
           <Button type="submit" disabled={busy || !input.trim()}>
-            {busy ? "Working…" : "Run preview"}
+            {busy ? "Working…" : "Send"}
           </Button>
         </form>
       </details>
@@ -400,7 +399,7 @@ export function EmployeeActivity({
       )}
       {!isError && !runs.length && (
         <p className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
-          No work recorded yet. Connect Slack or try a preview.
+          No messages yet. Send a message here or connect Slack.
         </p>
       )}
       <div className="space-y-4">
@@ -408,7 +407,7 @@ export function EmployeeActivity({
           <article key={run.id} className="rounded-xl border p-5">
             <div className="flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
               <span>
-                {run.platform === "slack" ? "Slack" : "Preview"} · {run.status}
+                {run.platform === "slack" ? "Slack" : "Chat"} · {run.status}
                 {run.platform === "slack"
                   ? ` · delivery: ${run.delivery_status}`
                   : ""}

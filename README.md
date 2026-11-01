@@ -39,7 +39,7 @@ If you cannot edit an existing Slack app, its owner can add you as a collaborato
 
 On an employee's page, connect **Exa Web Search**, **Pitch Deck Generator**, or **Visualization Charts**. These need no extra credentials. Search uses [Exa's public MCP service](https://exa.ai/docs/get-started/exa-mcp), whose service rate limits apply. Presentations and bar charts are generated locally; they do not use Canva or Gamma.
 
-Ask in Slack for a PowerPoint, a chart from supplied numbers, or public web research. The website's **Work and context → Test this employee** also supports these actions when **Allow connected tools for this request** is checked. It is off by default. Successful file tools return a download link; sign in to the company account to download. Files are stored privately with the originating run, not published to company knowledge automatically.
+Ask in Slack for a PowerPoint, a chart from supplied numbers, or public web research. The website's **Work and context → Chat** also supports these actions when **Allow connected tools for this request** is checked. It is off by default. Successful file tools return a download link; sign in to the company account to download. Files are stored privately with the originating run, not published to company knowledge automatically.
 
 n8n connections require the real HTTPS MCP endpoint and token, and tool discovery must succeed before saving. Other catalogue entries are not implemented connections yet.
 
@@ -76,7 +76,7 @@ TEST_DATABASE_URL=postgresql+asyncpg://yugabyte:yugabyte@localhost:5433/openhuma
 
 `scripts/check_meko.py` is a live, synthetic-data check. It reuses two demo datapacks because deleted datapacks do not restore creation-quota slots. Run it only with an approved account and available quota. Stop on quota errors; do not repeatedly retry them. On 2026-11-01, conversation saving, automatic extraction and fresh-task recall passed against the newly authorised account through the local application API.
 
-The employee page's **Work and context** preview can compare Meko enabled/disabled. Disabling saved knowledge bypasses Meko and old thread history. Connected work tools are controlled separately by the explicit checkbox, which is off by default.
+The employee page's **Work and context → Chat** can compare Meko enabled/disabled. Disabling saved knowledge bypasses Meko and old thread history. Connected work tools are controlled separately by the explicit checkbox, which is off by default.
 
 `scripts/check_dashboard_auth.py` uses Playwright against the running app to check missing-cookie recovery, invalid saved sessions, cookie-only sessions and fresh sign-in. Supply an existing test account through `OPENHUMAN_TEST_EMAIL` and `OPENHUMAN_TEST_PASSWORD`, then run `uv run --project apps/api --with playwright python scripts/check_dashboard_auth.py`. Install Playwright's Chromium first if needed. The check makes no Meko calls and does not reset a database.
 
