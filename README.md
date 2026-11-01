@@ -1,85 +1,77 @@
 # OpenHuman
 
-AI employees for a company, working in Slack with Meko memory and company knowledge.
+AI employees for Slack, with company knowledge and their own memory.
 
-Our [Meko feature proposal](docs/meko-feature-proposal.docx) describes reviewed memory sharing between employee and company datapacks, with source tracking and withdrawal.
+Set up your company, add its documents, and choose employees from job templates. Alex can help with customer support; Allison can handle HR questions. Customise their responsibilities and instructions, then add them to Slack. They use the company's shared knowledge alongside what they have learned in their own work.
 
-Create a company, optionally upload shared documents, choose an employee from a job template, customise their duties/instructions, add relevant documents, and connect Slack. The website manages employees, knowledge, remembered facts and actual activity.
+Built by **tungtungtungsahur** for **hackCBS 9.0 · Meko Track A**.
 
-## Run
+## What you can do
 
-Requires Docker with Compose, Python 3, an OpenAI key and a Meko product key.
+- Give each employee the documents relevant to their job.
+- Talk through Slack mentions, direct messages and threads, or use **Chat** on the website.
+- Inspect recalled sources and saved memories; add, correct or forget a fact.
+- Connect web search, PowerPoint generation and bar charts. Review the results and download generated files from the website.
 
-1. Run `python3 scripts/setup.py`.
-2. Add `OPENAI_API_KEY` and `MEKO_PRODUCT_API_KEY` to the root `.env`.
-3. Run `docker compose up --build -d`.
-4. Open [localhost:3000](http://localhost:3000).
+## Setup in five steps
 
-The first YugabyteDB image download is large. Data persists in the Compose volume. `/ready` checks the application database and key presence, not remote service connectivity. After editing `.env`, run `docker compose up -d --force-recreate backend`.
+You need **Git, Python 3, Docker with Compose**, an **OpenAI API key** and a **Meko API key** with available quota.
 
-Configure each role's Slack app credentials once on the server; `.env.example` lists them. The backend starts its connections automatically. Employees connect their workspace through the website, then work in the channels they are invited to. Use a private test channel first. No keys belong in chat, logs, source control or Meko memory.
+1. **Clone the repository.**
 
-## Slack setup
+   ```sh
+   git clone https://github.com/snowsadh/meko.git
+   cd meko
+   ```
 
-1. Configure each required role's Slack app credentials in `.env`. Enable Socket Mode and create an app-level token with `connections:write`.
-2. Set `SLACK_OAUTH_REDIRECT_URI` to the backend's public HTTPS URL ending in `/api/slack/oauth/callback`. Register that exact URL under each Slack app's OAuth & Permissions. Local development needs an HTTPS tunnel or a deployed backend for this callback. [Slack requires HTTPS for OAuth redirects](https://docs.slack.dev/authentication/installing-with-oauth/).
-3. Subscribe to bot events `app_mention`, `message.channels`, `message.groups`, `message.im`, and `message.mpim`. Requested bot scopes are `app_mentions:read`, `channels:history`, `groups:history`, `chat:write`, `im:history`, `im:write`, and `mpim:history`.
-4. Recreate the backend after server credential changes. In the employee's configuration page, choose **Add [name] to Slack**, finish Slack's approval, and invite that employee to the intended channels. One company uses one Slack workspace; fixed role apps each represent one employee in that workspace.
-5. Mention the employee, send a direct message, or continue its thread. Its backend handles the request automatically. New channel invitations do not require a new listener, a channel ID setting or a server restart.
+2. **Prepare local settings.** This creates `.env` and generates the application's signing and encryption keys.
 
-Slack connections and routed memory delivery are enabled by default. `GATEWAY_ENABLED=false` deliberately pauses Slack processing; `SLACK_MEMORY_ENABLED=false` records routing decisions without delivering them to Meko. These are server controls, not employee onboarding steps.
+   ```sh
+   python3 scripts/setup.py
+   ```
 
-An app-level token opens one event connection per role app, covering its installed workspaces and channel memberships. Installation supplies the separate bot token used by the backend to send replies. OpenAI, employee instructions and Meko determine the answer; the Slack token supplies the sender identity. Socket Mode does not require a public event webhook. The collapsed **Work and context** section shows the actual connection state, routing previews, original chat, decisions and confirmed destination status. A routing preview uses OpenAI and writes nothing to Meko.
+3. **Add your service keys** to `.env`.
 
-For local OAuth, run `python3 scripts/slack_callback_proxy.py` and, in another terminal, `cloudflared tunnel --url http://127.0.0.1:8010`. Register the printed HTTPS URL plus `/api/slack/oauth/callback` in Slack and set the same value in `.env`. This proxy exposes only that callback; other paths return 404. Its check is `python3 scripts/test_slack_callback_proxy.py`. The temporary URL changes when the tunnel restarts. Docker disables request access logs so OAuth codes and state are not recorded in request URLs.
+   ```dotenv
+   OPENAI_API_KEY=your-openai-key
+   MEKO_PRODUCT_API_KEY=your-meko-key
+   ```
 
-For a bounded Slack test, set `SLACK_ALLOWED_CHANNEL_IDS=["C_YOUR_TEST_CHANNEL_ID"]`. Messages outside this list are ignored, and queued replies outside it are cancelled. Leave it empty to use all channels the installed bots can see. Recreate the backend after changing it.
+4. **Start the app.** Docker runs the website, backend and YugabyteDB, and applies database migrations. The first build can take a few minutes.
 
-If you cannot edit an existing Slack app, its owner can add you as a collaborator, or you can [create your own app](https://api.slack.com/apps?new_app=1). To fill its settings in one paste, run `python3 scripts/slack_manifest.py --name Alex --callback https://YOUR_TUNNEL/api/slack/oauth/callback`, then choose **From a manifest**, select **JSON**, and paste the output. This configures the required bot permissions, events, direct messages and Socket Mode. From **Basic Information**, copy the Client ID and Client Secret; generate an app-level token with `connections:write`. Set the three `SLACK_BOT_SUPPORT_*` values in `.env`, recreate the backend, and use **Add Alex to Slack** on the employee page. Repeat with the other roles' names and environment prefixes only when needed. See [Slack's manifest guide](https://docs.slack.dev/app-manifests/configuring-apps-with-app-manifests/).
+   ```sh
+   docker compose up --build -d
+   ```
 
-## Employee actions
+5. **Open [localhost:3000](http://localhost:3000)** and create an account. Set up a company, optionally add shared documents, and onboard an employee. Open the employee's **Work and context → Chat** to send a message.
 
-On an employee's page, connect **Exa Web Search**, **Pitch Deck Generator**, or **Visualization Charts**. These need no extra credentials. Search uses [Exa's public MCP service](https://exa.ai/docs/get-started/exa-mcp), whose service rate limits apply. Presentations and bar charts are generated locally; they do not use Canva or Gamma.
+Website chat works without Slack. To use employees in your workspace, follow the [Slack setup guide](docs/setup.md#slack-setup), connect the employee from its page, and invite it to a channel. It starts listening automatically.
 
-Ask in Slack for a PowerPoint, a chart from supplied numbers, or public web research. The website's **Work and context → Chat** also supports these actions when **Allow connected tools for this request** is checked. It is off by default. Successful file tools return a download link; sign in to the company account to download. Files are stored privately with the originating run, not published to company knowledge automatically.
+## Where Meko fits
 
-n8n connections require the real HTTPS MCP endpoint and token, and tool discovery must succeed before saving. Other catalogue entries are not implemented connections yet.
+A **datapack** is Meko's container for conversations, memories and documents. OpenHuman creates one for shared company knowledge and a separate one for each employee. Before answering, an employee retrieves its own context and the company's shared knowledge.
 
-## How memory works
+For new Slack conversations, a shared router asks OpenAI where each chat chunk belongs: company knowledge, selected employees, both, or neither. Meko extracts durable facts from conversations accepted into employee memory. The website shows sources, routing decisions and save status.
 
-- One company datapack holds shared knowledge; each AI employee has a separate datapack for private documents and memory.
-- Before answering, an employee searches its own context and company knowledge.
-- A Slack chat router uses OpenAI to choose whether a chunk belongs to company knowledge, selected employees, both, or neither. Meko handles fact extraction for conversations sent to employee memory.
-- The website shows actual sources and remembered facts, supports remember/correct/forget, and records evidence and tool results. Conversation capture and asynchronous fact extraction have separate status.
-- Application accounts, configuration and activity live in local YugabyteDB. Meko uses its configured service endpoint. OpenAI handles replies and model-directed tool calls.
+| Service | Responsibility |
+| --- | --- |
+| **Meko** | Employee memory, shared company knowledge and document retrieval |
+| **OpenAI** | Replies, chat routing and tool-call decisions |
+| **YugabyteDB** | Accounts, employee settings, activity and generated files |
 
-The default Meko datapack is forbidden. Build-team context belongs only in the explicitly named build datapack; application data uses its separate product scopes.
+## Try the memory difference
 
-## Development
+The [sample onboarding documents](docs/onboarding/) describe a fictional company, Atlas. Upload the company handbook as shared knowledge and Alex's support playbook to Alex. Wait for indexing to finish, then ask:
 
-Install Bun 1.3.10+ and `uv`, then run `bun install` and `uv sync --project apps/api --extra dev`. Start the database with `docker compose up -d database`.
+> An Enterprise customer sees AMBER-217 when signing into Atlas. Who handles it, what should they do, and should we reset the password?
 
-From `apps/api`, set `DATABASE_URL=postgresql+asyncpg://yugabyte:yugabyte@localhost:5433/yugabyte`, run `uv run alembic upgrade head`, then `uv run uvicorn app.main:app --reload`. From `apps/web`, run `bun run dev`.
+In **Work and context → Chat**, send the same question with **Use saved knowledge** off, then on. Compare the answer and **Context used**. The playbook names Isha in Access Ops and the specific fix. Keep connected tools off for this comparison.
 
-```sh
-bun run typecheck
-bun run build
-uv run --project apps/api python scripts/check_slack_router.py
-```
+This switch applies to website chat; Slack continues to use saved knowledge.
 
-The routing check above makes real OpenAI calls using synthetic chat. It makes no Slack or Meko calls. Outcomes are model decisions, not a guarantee of classification accuracy.
+## Further reading
 
-Backend checks require a disposable database whose name ends in `_test`. They reset that database's schema and use controlled service responses unless a live check is explicitly selected:
-
-```sh
-docker compose exec -T database bin/ysqlsh -h database -U yugabyte -d yugabyte -c 'CREATE DATABASE openhuman_test'
-TEST_DATABASE_URL=postgresql+asyncpg://yugabyte:yugabyte@localhost:5433/openhuman_test uv run --project apps/api pytest apps/api/tests -q
-```
-
-`scripts/check_meko.py` is a live, synthetic-data check. It reuses two demo datapacks because deleted datapacks do not restore creation-quota slots. Run it only with an approved account and available quota. Stop on quota errors; do not repeatedly retry them. On 2026-11-01, conversation saving, automatic extraction and fresh-task recall passed against the newly authorised account through the local application API.
-
-The employee page's **Work and context → Chat** can compare Meko enabled/disabled. Disabling saved knowledge bypasses Meko and old thread history. Connected work tools are controlled separately by the explicit checkbox, which is off by default.
-
-`scripts/check_dashboard_auth.py` uses Playwright against the running app to check missing-cookie recovery, invalid saved sessions, cookie-only sessions and fresh sign-in. Supply an existing test account through `OPENHUMAN_TEST_EMAIL` and `OPENHUMAN_TEST_PASSWORD`, then run `uv run --project apps/api --with playwright python scripts/check_dashboard_auth.py`. Install Playwright's Chromium first if needed. The check makes no Meko calls and does not reset a database.
-
-See [architecture](docs/architecture.md), [challenge requirements](requirements.md), and [Meko notes](docs/meko-notes.md).
+- [Slack setup, available tools and development checks](docs/setup.md)
+- [Architecture and verification notes](docs/architecture.md)
+- [Meko feature proposal: sharing selected memories between datapacks](docs/meko-feature-proposal.docx)
+- [Challenge requirements](requirements.md)
