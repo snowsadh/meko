@@ -224,7 +224,7 @@ These notes help implementation; they do not select a stack or add competition d
 - **Connectivity:** Meko is online, and hosted models also require internet. The brief says the event can arrange at most one connection per team and advises bringing a hotspot. If using a local open model, download its trained model files before the event. [S1, pp. 1, 5]
 - **Accounts and docs:** the brief provides a Meko account for each teammate and directs teams to the quick start, core concepts, examples, and tool documentation. Confirm access early. [S1, p. 1; [S4](https://docs.mekodata.ai/)]
 
-This requirements file does not establish working product behavior. Consult the [architecture and verification limits](docs/architecture.md) for actual checks. Slack installation/outbound replies and fresh-account Meko conversation capture have live checks. Fresh human message intake, demo timing, and challenge acceptance remain pending.
+This requirements file does not establish working product behavior. Consult the [architecture and verification limits](docs/architecture.md) for actual checks. Slack installation, fresh human message intake, outbound replies and fresh-account Meko conversation capture have live checks. External action tools, demo timing, and challenge acceptance remain pending.
 
 ## 9. Scope boundaries: what Track A does not require
 
