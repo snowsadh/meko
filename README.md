@@ -31,6 +31,8 @@ For local OAuth, run `python3 scripts/slack_callback_proxy.py` and, in another t
 
 For a bounded Slack test, set `SLACK_ALLOWED_CHANNEL_IDS=["C_YOUR_TEST_CHANNEL_ID"]`. Messages outside this list are ignored, and queued replies outside it are cancelled. Leave it empty to use all channels the installed bots can see. Recreate the backend after changing it.
 
+If you cannot edit an existing Slack app, its owner can add you as a collaborator, or you can [create your own app](https://api.slack.com/apps?new_app=1). To fill its settings in one paste, run `python3 scripts/slack_manifest.py --name Alex --callback https://YOUR_TUNNEL/api/slack/oauth/callback`, then choose **From a manifest**, select **JSON**, and paste the output. This configures the required bot permissions, events, direct messages and Socket Mode. From **Basic Information**, copy the Client ID and Client Secret; generate an app-level token with `connections:write`. Set the three `SLACK_BOT_SUPPORT_*` values in `.env`, recreate the backend, and use **Add Alex to Slack** on the employee page. Repeat with the other roles' names and environment prefixes only when needed. See [Slack's manifest guide](https://docs.slack.dev/app-manifests/configuring-apps-with-app-manifests/).
+
 ## How memory works
 
 - One company datapack holds shared knowledge; each AI employee has a separate datapack for private documents and memory.
@@ -65,5 +67,7 @@ TEST_DATABASE_URL=postgresql+asyncpg://yugabyte:yugabyte@localhost:5433/openhuma
 `scripts/check_meko.py` is a live, synthetic-data check. It reuses two demo datapacks because deleted datapacks do not restore creation-quota slots. Run it only with an approved account and available quota. Stop on quota errors; do not repeatedly retry them. On 2026-11-01, conversation saving, automatic extraction and fresh-task recall passed against the newly authorised account through the local application API.
 
 The employee page's **Work and context** preview can compare Meko enabled/disabled. Disabled previews bypass Meko and old thread history; connected external work tools are disabled in the preview.
+
+`scripts/check_dashboard_auth.py` uses Playwright against the running app to check missing-cookie recovery, invalid saved sessions, cookie-only sessions and fresh sign-in. Supply an existing test account through `OPENHUMAN_TEST_EMAIL` and `OPENHUMAN_TEST_PASSWORD`, then run `uv run --project apps/api --with playwright python scripts/check_dashboard_auth.py`. Install Playwright's Chromium first if needed. The check makes no Meko calls and does not reset a database.
 
 See [architecture](docs/architecture.md), [challenge requirements](requirements.md), and [Meko notes](docs/meko-notes.md).
