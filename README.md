@@ -1,8 +1,6 @@
 # OpenHuman
 
-AI employees for Slack, with company knowledge and their own memory.
-
-Set up your company, add its documents, and choose employees from job templates. Alex can help with customer support; Allison can handle HR questions. Customise their responsibilities and instructions, then add them to Slack. They use the company's shared knowledge alongside what they have learned in their own work.
+OpenHuman lets teams create AI coworkers that live inside Slack or Discord. Each coworker has its own role, persistent knowledge graph, MCP tools, and permissions. They can complete multi-step work across connected systems, while Meko handles how they automatically adapt over time with your experiences together.
 
 Built by **tungtungtungsahur** for **hackCBS 9.0 · Meko Track A**.
 
