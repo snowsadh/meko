@@ -77,15 +77,11 @@ For new Slack conversations, a shared router asks OpenAI where each chat chunk b
 | **OpenAI** | Replies, chat routing and tool-call decisions |
 | **YugabyteDB** | Accounts, employee settings, activity and generated files |
 
-## Try the memory difference
+## Try it with your own knowledge
 
-The [sample onboarding documents](docs/onboarding/) describe a fictional company, Atlas. Upload the company handbook as shared knowledge and Alex's support playbook to Alex. Wait for indexing to finish, then ask:
+Add your company's documents and give each employee material relevant to their role. Once indexing finishes, ask something that depends on that information. Open **Context used** to see which sources informed the reply.
 
-> An Enterprise customer sees AMBER-217 when signing into Atlas. Who handles it, what should they do, and should we reset the password?
-
-In **Work and context → Chat**, send the same question with **Use saved knowledge** off, then on. Compare the answer and **Context used**. The playbook names Isha in Access Ops and the specific fix. Keep connected tools off for this comparison.
-
-This switch applies to website chat; Slack continues to use saved knowledge.
+To compare, send the same question in **Work and context → Chat** with **Use saved knowledge** off, then on. Keep the other settings the same. This switch applies to website chat; Slack continues to use saved knowledge.
 
 ## Further reading
 
