@@ -29,4 +29,4 @@ COPY alembic.ini /app/
 
 ENV PYTHONUNBUFFERED=1
 
-CMD ["sh", "-c", "migrated=false; for attempt in $(seq 1 30); do if alembic upgrade head; then migrated=true; break; fi; echo \"Alembic waiting for database (attempt $attempt/30)\"; sleep 2; done; test \"$migrated\" = true || exit 1; exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "migrated=false; for attempt in $(seq 1 30); do if alembic upgrade head; then migrated=true; break; fi; echo \"Alembic waiting for database (attempt $attempt/30)\"; sleep 2; done; test \"$migrated\" = true || exit 1; exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --no-access-log"]

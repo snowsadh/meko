@@ -27,6 +27,8 @@ Slack stays off until its app credentials are configured. `.env.example` lists t
 
 An app-level token opens the event connection; installation supplies the separate bot token used to reply. Socket Mode does not require a public event webhook. The collapsed **Work and context** section shows app setup, routing previews, original chat, decisions and actual destination status. A routing preview uses OpenAI and writes nothing to Meko.
 
+For local OAuth, run `python3 scripts/slack_callback_proxy.py` and, in another terminal, `cloudflared tunnel --url http://127.0.0.1:8010`. Register the printed HTTPS URL plus `/api/slack/oauth/callback` in Slack and set the same value in `.env`. This proxy exposes only that callback; other paths return 404. Its check is `python3 scripts/test_slack_callback_proxy.py`. The temporary URL changes when the tunnel restarts. Docker disables request access logs so OAuth codes and state are not recorded in request URLs.
+
 ## How memory works
 
 - One company datapack holds shared knowledge; each AI employee has a separate datapack for private documents and memory.
