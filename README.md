@@ -2,6 +2,8 @@
 
 AI employees for a company, working in Slack with Meko memory and company knowledge.
 
+Our [Meko feature proposal](docs/meko-feature-proposal.docx) describes reviewed memory sharing between employee and company datapacks, with source tracking and withdrawal.
+
 Create a company, optionally upload shared documents, choose an employee from a job template, customise their duties/instructions, add relevant documents, and connect Slack. The website manages employees, knowledge, remembered facts and actual activity.
 
 ## Run
