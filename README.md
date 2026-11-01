@@ -1,15 +1,35 @@
 # OpenHuman
 
-OpenHuman lets teams create AI coworkers that live inside Slack or Discord. Each coworker has its own role, persistent knowledge graph, MCP tools, and permissions. They can complete multi-step work across connected systems, while Meko handles how they automatically adapt over time with your experiences together.
+**An actionable datapack orchestrator built on Meko, for solopreneurs and companies building an AI team.**
+
+OpenHuman turns company knowledge into AI coworkers that work alongside you in Slack. A **datapack** is Meko's container for conversations, memories and documents. Each coworker gets a private one, along with a role, instructions and connected tools. One common company datapack gives the whole team shared context.
+
+Meko gives these coworkers continuity: a support fix, company decision or customer preference can inform the next task. OpenHuman makes that context actionable. Coworkers use the tools connected to their role to work across your team's systems, follow company rules and carry a task through several steps. A shared chat router sends new context to the right datapacks, and Meko extracts facts employees can recall later.
 
 Built by **tungtungtungsahur** for **hackCBS 9.0 · Meko Track A**.
+
+## Architecture
+
+Tool connections use the **Model Context Protocol (MCP)**. The diagram includes integration examples; the [setup guide](docs/setup.md#employee-actions) lists current connection support.
+
+![OpenHuman architecture: dashboard, AI employees, connected tools, and Meko with one common company datapack and separate employee datapacks](docs/assets/architecture.png)
+
+Example layout for Atlas. Each employee reads its own context and the common company datapack; private employee datapacks are created during onboarding.
+
+## What you can build
+
+The role, knowledge and connected tools determine what a coworker can take on:
+
+- **Customer support:** use product guides and past resolutions to handle familiar problems, prepare replies and follow up through connected support workflows.
+- **HR:** apply company policy to private employee records, check leave balances and handle requests through connected HR workflows.
+- **Sales:** combine product knowledge and past customer conversations to research prospects, prepare account briefs and help with follow-ups.
 
 ## What you can do
 
 - Give each employee the documents relevant to their job.
 - Talk through Slack mentions, direct messages and threads, or use **Chat** on the website.
 - Inspect recalled sources and saved memories; add, correct or forget a fact.
-- Connect web search, PowerPoint generation and bar charts. Review the results and download generated files from the website.
+- Connect tools so employees can act across your team's systems. Review tool results, completed work and generated files from the website.
 
 ## Setup in five steps
 
@@ -45,9 +65,9 @@ You need **Git, Python 3, Docker with Compose**, an **OpenAI API key** and a **M
 
 Website chat works without Slack. To use employees in your workspace, follow the [Slack setup guide](docs/setup.md#slack-setup), connect the employee from its page, and invite it to a channel. It starts listening automatically.
 
-## Where Meko fits
+## How it works
 
-A **datapack** is Meko's container for conversations, memories and documents. OpenHuman creates one for shared company knowledge and a separate one for each employee. Before answering, an employee retrieves its own context and the company's shared knowledge.
+Company setup comes first: add shared documents, then onboard employees from job templates and give each one its own instructions and documents. When a message arrives, the employee retrieves relevant company knowledge and its private context before OpenAI prepares the reply or calls an enabled tool.
 
 For new Slack conversations, a shared router asks OpenAI where each chat chunk belongs: company knowledge, selected employees, both, or neither. Meko extracts durable facts from conversations accepted into employee memory. The website shows sources, routing decisions and save status.
 
