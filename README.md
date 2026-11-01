@@ -1,6 +1,10 @@
 # OpenHuman
 
-OpenHuman lets teams create AI coworkers that live inside Slack or Discord. Each coworker has its own role, persistent knowledge graph, MCP tools, and permissions. They can complete multi-step work across connected systems, while Meko handles how they automatically adapt over time with your experiences together.
+**An actionable datapack orchestrator built on Meko, for solopreneurs and companies building an AI team.**
+
+OpenHuman turns company knowledge into AI coworkers that work alongside you in Slack. A **datapack** is Meko's container for conversations, memories and documents. Each coworker gets a private one, along with a role, instructions and connected tools. One common company datapack gives the whole team shared context.
+
+Meko gives these coworkers continuity: a support fix, company decision or customer preference can inform the next task. OpenHuman connects that memory to useful work—answering customers, researching prospects and creating presentations. As the team works, a shared chat router sends new context to the right datapacks, and Meko extracts facts employees can recall later.
 
 Built by **tungtungtungsahur** for **hackCBS 9.0 · Meko Track A**.
 
@@ -8,7 +12,7 @@ Built by **tungtungtungsahur** for **hackCBS 9.0 · Meko Track A**.
 
 ![OpenHuman architecture: dashboard, AI employees, connected tools, and Meko with one common company datapack and separate employee datapacks](docs/assets/architecture.png)
 
-A **datapack** is Meko's container for conversations, memories and documents. Each employee reads its own datapack and the common company datapack. The Atlas names above illustrate the layout; employee datapacks are created during onboarding.
+Example layout for Atlas. Each employee reads its own context and the common company datapack; private employee datapacks are created during onboarding.
 
 ## What you can build
 
