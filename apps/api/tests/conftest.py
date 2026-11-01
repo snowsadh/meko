@@ -29,8 +29,12 @@ class FakeMeko:
         self.captures = {}
         self.fail_search = False
         self.fail_file_delete = False
+        self.datapacks = {}
 
     async def ensure_datapack(self, name, description):
+        if name in self.datapacks and self.datapacks[name] != description:
+            raise MekoError("That datapack name is already in use.")
+        self.datapacks[name] = description
         return str(uuid5(NAMESPACE_URL, name))
 
     async def conversation(self, pack, agent, session, title):

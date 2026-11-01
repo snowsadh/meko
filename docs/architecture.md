@@ -8,6 +8,11 @@ YugabyteDB stores accounts, companies, employee configuration, source records an
 
 Each employee reads its own memories/documents plus company knowledge. Separate datapacks prevent one employee from retrieving another employee's private context. The company administrator can inspect employee configuration and memory.
 
+New datapack names use `<company>-company-common` and `<employee>-<company>-emp`,
+with lowercase names and hyphens for spaces/punctuation. For Atlas, these are
+`atlas-company-common`, `alex-atlas-emp` and `allison-atlas-emp`. Meko's 60-character
+name limit applies. The saved datapack ID remains the application's binding.
+
 ## Slack and reasoning
 
 Slack apps use Socket Mode (Slack's outgoing event connection) and signed installation state. The backend starts one connection per configured role app automatically. That connection covers new workspace installations and all channels the employee is invited to; there is no per-channel listener setup. One company is bound to one Slack workspace. The server saves intake before acknowledging events, deduplicates the same message across role apps and retries, and queues employee work separately. Direct messages, mentions and follow-ups in an employee's thread receive replies. Ordinary visible channel messages can feed the router without triggering a reply.

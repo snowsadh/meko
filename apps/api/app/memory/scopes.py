@@ -1,5 +1,6 @@
 """Company and employee ownership is checked before choosing a Meko scope."""
 
+import re
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -13,6 +14,20 @@ from app.organizations.models import Organization
 
 def employee_agent(employee_id: UUID) -> str:
     return f"openhuman:{employee_id}"
+
+
+def datapack_name(company: str, employee: str | None = None) -> str:
+    def slug(value):
+        value = re.sub(r"[\W_]+", "-", value.casefold()).strip("-")
+        if not value:
+            raise MekoError("Company and employee names must contain letters or numbers.")
+        return value
+
+    company = slug(company)
+    name = f"{company}-company-common" if employee is None else f"{slug(employee)}-{company}-emp"
+    if len(name) > 60:
+        raise MekoError("Shorten the company or employee name: datapack names allow 60 characters.")
+    return name
 
 
 async def owned_org(db: AsyncSession, org_id: UUID, user_id: UUID) -> Organization:
@@ -42,7 +57,7 @@ async def connect_org(db: AsyncSession, org: Organization) -> Organization:
         return org
     try:
         org.meko_datapack_id = await meko.ensure_datapack(
-            f"oh-company-{org.id.hex}", f"Shared knowledge for {org.name}"
+            datapack_name(org.name), f"Shared knowledge for {org.name}. Company ID: {org.id}"
         )
         org.memory_setup_error = None
     except MekoError as exc:
@@ -60,7 +75,8 @@ async def connect_employee(db: AsyncSession, org: Organization, emp: Employee) -
         if not org.meko_datapack_id:
             raise MekoError(org.memory_setup_error or "Company memory is not connected.")
         emp.meko_datapack_id = await meko.ensure_datapack(
-            f"oh-employee-{emp.id.hex}", f"Private working context for {emp.name}"
+            datapack_name(org.name, emp.name),
+            f"Private working context for {emp.name}. Employee ID: {emp.id}",
         )
         emp.memory_setup_error = None
     except MekoError as exc:

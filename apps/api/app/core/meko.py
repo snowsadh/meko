@@ -165,6 +165,10 @@ class MekoClient:
         result = await self.http("GET", "/datapacks", params={"name": name, "limit": 100})
         for row in result.get("items", []):
             if row.get("datapack_name") == name and row.get("grant") == "owner":
+                if row.get("description") != description:
+                    raise MekoError(
+                        "That datapack name is already in use. Change the company or employee name."
+                    )
                 return product_pack(row["datapack_id"])
         result = await self.http(
             "POST", "/datapacks", json={"name": name, "description": description}
