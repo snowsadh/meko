@@ -17,7 +17,9 @@ export function useIsSignedIn() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    setIsSignedIn(!!localStorage.getItem(AUTH_COOKIE));
+    const token = localStorage.getItem(AUTH_COOKIE);
+    syncAuthCookie(token);
+    setIsSignedIn(!!token);
     setIsLoaded(true);
   }, []);
 
