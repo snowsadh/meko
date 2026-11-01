@@ -1183,13 +1183,13 @@ export default function EmployeeDetailPage() {
             },
             {
               slug: "web_search",
-              name: "Brave Web Search",
-              description: "Query search engines for web index answers.",
+              name: "Exa Web Search",
+              description: "Search public web pages. No API key needed; service rate limits apply.",
             },
             {
               slug: "visualization",
               name: "Visualization Charts",
-              description: "Create scatter plots, 3D graphs, histograms, heatmaps, line charts, and network diagrams — no API key required.",
+              description: "Create downloadable bar charts from supplied data. No API key required.",
             },
             {
               slug: "canva",
@@ -1199,7 +1199,7 @@ export default function EmployeeDetailPage() {
             {
               slug: "pitchdeck",
               name: "Pitch Deck Generator",
-              description: "Generate styled .pptx pitch decks instantly — free, no API key, no signup.",
+              description: "Create editable PowerPoint files with speaker notes. No extra account required.",
             },
             {
               slug: "slack",

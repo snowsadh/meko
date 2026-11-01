@@ -29,8 +29,12 @@ class FakeMeko:
         self.captures = {}
         self.fail_search = False
         self.fail_file_delete = False
+        self.datapacks = {}
 
     async def ensure_datapack(self, name, description):
+        if name in self.datapacks and self.datapacks[name] != description:
+            raise MekoError("That datapack name is already in use.")
+        self.datapacks[name] = description
         return str(uuid5(NAMESPACE_URL, name))
 
     async def conversation(self, pack, agent, session, title):
@@ -172,6 +176,11 @@ async def product(monkeypatch):
     model = StubModel()
     monkeypatch.setattr(build, "ChatOpenAI", lambda **kwargs: model)
     monkeypatch.setattr(settings, "openai_api_key", "synthetic-test-key")
+    # Local operator settings must not restrict synthetic channels or open real sockets.
+    monkeypatch.setattr(settings, "gateway_enabled", False)
+    monkeypatch.setattr(settings, "slack_memory_enabled", True)
+    monkeypatch.setattr(settings, "slack_allowed_channel_ids", [])
+    monkeypatch.setattr(settings, "slack_identity_mode", "fixed")
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=app), base_url="http://test"
     ) as client:

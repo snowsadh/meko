@@ -6,6 +6,8 @@ import json
 import base64
 import hashlib
 import asyncio
+import logging
+import time
 from typing import Any
 from uuid import UUID
 
@@ -17,6 +19,7 @@ from app.core.config import settings
 
 BUILD_DATAPACK_ID = "e6b3af37-3006-4337-bfd1-51c7e50b2207"
 DEFAULT_DATAPACK_ID = "71dadccc-232c-4d99-b53a-e4e7fa6abf54"
+logger = logging.getLogger(__name__)
 
 
 class MekoError(RuntimeError):
@@ -101,6 +104,7 @@ class MekoClient:
 
     async def call(self, name: str, *, datapack_id: str, **arguments: Any) -> Any:
         arguments["datapack_id"] = product_pack(datapack_id)
+        started = time.monotonic()
         try:
             async with (
                 asyncio.timeout(settings.meko_timeout_seconds),
@@ -119,7 +123,12 @@ class MekoClient:
             raise
         except Exception as exc:
             # A write may have reached the server. Never silently retry it.
+            logger.warning("Meko %s interrupted (%s)", name, type(exc).__name__)
             raise MekoError("Meko operation was interrupted; its result is unconfirmed.") from exc
+        finally:
+            elapsed = time.monotonic() - started
+            if elapsed >= 10:
+                logger.warning("Meko %s took %.1f seconds", name, elapsed)
 
     async def save_turn(self, pack, agent, conversation, input, output, *, seed, metadata=None):
         await self.call(
@@ -156,6 +165,10 @@ class MekoClient:
         result = await self.http("GET", "/datapacks", params={"name": name, "limit": 100})
         for row in result.get("items", []):
             if row.get("datapack_name") == name and row.get("grant") == "owner":
+                if row.get("description") != description:
+                    raise MekoError(
+                        "That datapack name is already in use. Change the company or employee name."
+                    )
                 return product_pack(row["datapack_id"])
         result = await self.http(
             "POST", "/datapacks", json={"name": name, "description": description}

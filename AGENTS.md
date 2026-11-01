@@ -32,6 +32,8 @@ Commit after each small sensible checkpoint and push completed work. Describe ac
 
 Run checks relevant to a change. Use disposable databases ending in _test for backend tests; never reset a user's application database. Separate service stubs from live verification. Do not post live Slack test messages until the workspace/channel is explicitly authorised.
 
+Installed employees automatically work in channels they are invited to. Channel allowlists are optional operator test controls, never employee onboarding steps. Verify normal replies through the listener and backend; direct bot-token posts and manually queued jobs are diagnostics, not proof of automatic incoming-message handling.
+
 ## Communication
 
 Keep updates short and plain. Define unfamiliar terms before relying on them. State what changed, what was tested, and remaining limitations. Prefer existing code, installed dependencies and simple database constraints. Do not add machinery for hypothetical future needs.

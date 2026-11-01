@@ -8,11 +8,18 @@ YugabyteDB stores accounts, companies, employee configuration, source records an
 
 Each employee reads its own memories/documents plus company knowledge. Separate datapacks prevent one employee from retrieving another employee's private context. The company administrator can inspect employee configuration and memory.
 
+New datapack names use `<company>-company-common` and `<employee>-<company>-emp`,
+with lowercase names and hyphens for spaces/punctuation. For Atlas, these are
+`atlas-company-common`, `alex-atlas-emp` and `allison-atlas-emp`. Meko's 60-character
+name limit applies. The saved datapack ID remains the application's binding.
+
 ## Slack and reasoning
 
-Slack apps use Socket Mode (Slack's outgoing event connection) and signed installation state. One company is bound to one Slack workspace. The server saves intake before acknowledging events, deduplicates the same message across role apps and retries, and queues employee work separately. Direct messages, mentions and follow-ups in an employee's thread receive replies. Ordinary visible channel messages can feed the router without triggering a reply.
+Slack apps use Socket Mode (Slack's outgoing event connection) and signed installation state. The backend starts one connection per configured role app automatically. That connection covers new workspace installations and all channels the employee is invited to; there is no per-channel listener setup. One company is bound to one Slack workspace. The server saves intake before acknowledging events, deduplicates the same message across role apps and retries, and queues employee work separately. Direct messages, mentions and follow-ups in an employee's thread receive replies. Ordinary visible channel messages can feed the router without triggering a reply.
 
 OpenAI receives the job baseline, company details, custom instructions, relevant evidence and permitted tools. Only successful tool results justify completed-action claims. Replies stay in the source thread and run in order for that employee/thread. An unconfirmed Slack send is recorded for inspection and is not automatically resent. Run one gateway process per deployment.
+
+The employee runs in the backend; Slack supplies its sender identity. A direct post made with the bot token proves outbound Slack access, not the employee's reasoning or incoming-message handling. Normal verification must enter through the listener and backend. The website reports the SDK's actual connection state separately from installation and server-enable settings.
 
 ## Approved chat-router policy
 
@@ -30,6 +37,28 @@ Slack history is collected from new events the installed bots can see, including
 
 ## Verification limits
 
-Company/employee setup, memory boundaries, mutations, Slack event handling and delivery checkpoints have backend checks with service stubs against PostgreSQL and YugabyteDB. Real Meko fact/document operations and a real OpenAI reply/local-tool call were checked. Six synthetic routing examples matched expectations after prompt/roster fixes in a live OpenAI check; earlier checks exposed mistakes, so this is not an accuracy benchmark.
+Company/employee setup, memory boundaries, mutations, Slack event handling and delivery checkpoints have backend checks with service stubs against PostgreSQL and YugabyteDB. Real Meko fact/document operations and a real OpenAI reply/local-tool call were checked. Eight synthetic routing examples matched expectations after prompt/roster fixes in a live OpenAI check, including addressed greetings and repeated baseline introductions. An initial live greeting was misrouted to employee memory; the prompt was tightened and classification temperature set to zero. These examples are not an accuracy benchmark.
 
-All five Slack app-level tokens passed `apps.connections.open`; no event listeners or live posts were used for that check. Actual installation/reply verification still requires a registered HTTPS callback and an authorised test channel. Conversation capture remains blocked by the current Meko account's lifetime quota. Connected external services require their own real connections before workflow execution can be verified.
+On 2026-11-01, two product datapacks were created on the newly authorised Meko account and connected to the local Atlas demo. A real website API task saved its conversation with readback; Meko extracted the escalation rule without a separate `remember_fact` call. A fresh task retrieved that private fact and the indexed company guide and named the correct escalation owner. The company memory store did not contain the private fact. This checks existing-company reconnection and fresh scope creation; it does not prove the full signup/onboarding flow on that account.
+
+The user-owned Support app was installed through real Slack OAuth and its bot identity was verified. Real posts and independent thread readback passed. The temporary test-channel filter has been removed at the user's request; normal operation follows the bot's channel memberships. `SLACK_ALLOWED_CHANNEL_IDS` remains an optional operator test boundary. Other role apps remain disabled until configured.
+
+A backend test starts one role connection before installation, completes the installation callback, and processes listener events from two newly seen channels through the reply worker without restarting or registering either channel. It uses service stubs on disposable YugabyteDB; three relevant checks passed. The deployed SDK reports a live Slack connection with no channel filter, and the website's connected status was checked in a real browser.
+
+One human mention sent before startup was manually caught up from verified Slack history, with that origin recorded in activity. A labelled, app-queued self-test compared the same support question with and without Meko; the Meko-backed answer named the stored escalation owner and both answers were read back from Slack. These checks verify application work and outbound delivery, not a fresh human Socket Mode round trip. A confirmed reply was automatically routed into employee memory and read back; none of those chunks was published company-wide. The first greeting save remains an explicit unconfirmed failure and was not automatically retried.
+
+Later, a fresh human message passed through the normal Slack listener and reply worker without manual queueing. Run `9273eacd-dda0-414c-aba5-76b52a8e34ae` completed and its reply was independently read back from the authorised test channel. That run made no explicit tool calls; it verifies normal incoming chat and delivery, not external actions.
+
+Employee configuration now supports Exa public web search through MCP, local PowerPoint generation, local SVG bar charts, and n8n workflow connections. Each tool must be enabled for the employee or company and permitted by its job template. Remote services must expose tools successfully before a connection is saved. Unavailable services are recorded in activity without disabling ordinary chat. Other services listed in the catalogue remain unimplemented; template tool lists are not proof of available tools.
+
+Generated files belong to their originating employee run and are stored in YugabyteDB. Downloads require the company owner's sign-in, use the existing access check, and include a content hash. File generation reads back saved bytes before returning a URL. The website displays an actual download link beside the successful tool result. The existing test form can run connected tools when its explicit checkbox is enabled; its default remains off. Slack uses enabled tools automatically when needed.
+
+Two action checks passed on disposable YugabyteDB using explicit service/model stubs. They cover remote discovery failure without a false connection, employee scope, execution results, disconnects, real PowerPoint contents and speaker notes, SVG escaping, download ownership, hashes and duplicate request handling. Direct live Exa MCP discovery and search returned public source URLs.
+
+On 2026-11-01, three authenticated application requests used real OpenAI tool calls successfully. Run `70832800-746c-4fe1-973d-d3bfc8fd8e76` recalled five Meko evidence items and created a three-slide support PowerPoint containing the stored escalation owner. Its actual downloaded file passed structural validation and all three slides were rendered and inspected. Run `2a0ffd83-fd11-4dc2-941e-ef1c049690a6` created a chart from explicitly synthetic counts. Run `2aec6d2d-cd52-444a-b6e0-e8899ea13e34` used Exa MCP to find Slack's official documentation. The chart and public-search checks deliberately bypassed Meko.
+
+A real browser opened the employee page, checked the tool toggle, downloaded the PowerPoint with the matching stored hash, and confirmed that a signed-out download redirects to sign-in. Submitting the test form with connected tools enabled created a real chart in run `8154e872-fad6-4be5-b703-6cf03db444c0`. These are website action checks; a fresh Slack action request has not been independently checked. Normal incoming Slack chat and delivery were verified separately above.
+
+The first live presentation run requested identical file creation twice. Identical presentation/chart calls within one request now reuse their first result, including failures, and activity marks reused results. Remote lookup tools continue to execute normally so later reads can see changes. The database regression check explicitly exercises duplicate file calls and verifies that only two distinct requested files exist.
+
+Remote memory latency is variable: one observed search took about 17 seconds. Slow/interrupted Meko calls now log operation names and timing without prompts or credentials. The temporary HTTPS tunnel exposes only the OAuth callback. Connected external services require their own real connections before workflow execution can be verified.

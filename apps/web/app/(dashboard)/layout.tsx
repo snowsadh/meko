@@ -27,7 +27,12 @@ function OrgInitializer({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn || orgsLoading || isError) return;
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      router.replace("/sign-in");
+      return;
+    }
+    if (orgsLoading || isError) return;
 
     const firstOrg = orgs?.[0] ?? null;
 

@@ -11,6 +11,7 @@ class AgentMessageRequest(BaseModel):
     thread_key: str | None = Field(None, max_length=200)
     request_key: UUID | None = None
     use_meko: bool = True
+    allow_tools: bool = False
 
 
 class AgentMessageResponse(BaseModel):

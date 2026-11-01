@@ -61,7 +61,7 @@ interface McpServer {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   iconColor: string;
   author: string;
-  rating: number;
+  rating?: number;
   tools: string[];
   resources: string[];
   mcpJsonConfig: string;
@@ -594,19 +594,18 @@ const MCP_SERVERS: McpServer[] = [
     mcpJsonConfig: `{\n  "mcpServers": {\n    "firebase": {\n      "command": "npx",\n      "args": ["-y", "@modelcontextprotocol/server-firebase"]\n    }\n  }\n}`
   },
   {
-    id: "exa-search",
-    name: "Exa Neural Search",
-    description: "Search web repositories via vector embedding matchers and semantic crawls.",
+    id: "web_search",
+    name: "Exa Web Search",
+    description: "Search public web pages through Exa MCP. No API key needed; service rate limits apply.",
     category: "AI & Search",
-    authType: "API Key",
-    url: "https://api.exa.ai/mcp",
+    authType: "None",
+    url: "https://mcp.exa.ai/mcp",
     icon: Sparkles,
     iconColor: "from-teal-500 to-emerald-600",
     author: "Exa",
-    rating: 4.9,
-    tools: ["neural_search", "find_similar_pages", "extract_page_content"],
-    resources: ["exa://results"],
-    mcpJsonConfig: `{\n  "mcpServers": {\n    "exa-search": {\n      "command": "npx",\n      "args": ["-y", "@modelcontextprotocol/server-exa"]\n    }\n  }\n}`
+    tools: ["web_search_exa"],
+    resources: [],
+    mcpJsonConfig: JSON.stringify({ mcpServers: { exa: { url: "https://mcp.exa.ai/mcp?tools=web_search_exa" } } }, null, 2),
   },
   {
     id: "elasticsearch",
@@ -901,7 +900,7 @@ export default function McpMarketplacePage() {
                       </span>
                     </div>
                     <span className="text-[10px] text-muted-foreground/80 font-medium">
-                      by {server.author} • Rating: {server.rating}
+                      by {server.author}{server.rating !== undefined ? ` • Rating: ${server.rating}` : ""}
                     </span>
                   </div>
                 </CardHeader>
@@ -1026,7 +1025,7 @@ export default function McpMarketplacePage() {
                   {selectedServer.name}
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground">
-                  Official MCP Server by {selectedServer.author} • Rating: {selectedServer.rating}/5.0
+                  MCP Server by {selectedServer.author}{selectedServer.rating !== undefined ? ` • Rating: ${selectedServer.rating}/5.0` : ""}
                 </DialogDescription>
               </div>
             </DialogHeader>

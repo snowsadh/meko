@@ -22,6 +22,16 @@ const message = (error: unknown) =>
     : "The operation could not be completed.";
 const factText = (fact: MemoryFact) => fact.data || fact.memory || "";
 
+function ToolDownload({ result }: { result?: string }) {
+  try {
+    const file = JSON.parse(result || "{}").file;
+    if (!file || typeof file.filename !== "string" || !/^[0-9a-f-]{36}$/i.test(file.id)) return null;
+    return <a className="mt-2 inline-block text-sm underline" href={`/files/${file.id}`}>Download {file.filename}</a>;
+  } catch {
+    return null;
+  }
+}
+
 export function EmployeeMemory({
   orgId,
   employeeId,
@@ -290,6 +300,7 @@ export function EmployeeActivity({
   const client = useQueryClient();
   const [input, setInput] = useState("");
   const [useMemory, setUseMemory] = useState(true);
+  const [allowTools, setAllowTools] = useState(false);
   const [busy, setBusy] = useState(false);
   const {
     data: runs = [],
@@ -314,11 +325,11 @@ export function EmployeeActivity({
       </div>
       <details className="rounded-xl border p-4">
         <summary className="cursor-pointer text-sm font-medium">
-          Test this employee
+          Chat
         </summary>
         <p className="mt-2 text-sm text-muted-foreground">
-          Try a fresh request before using Slack. Connected work tools are
-          disabled in this preview.
+          Message this employee. Choose whether to use saved knowledge and
+          connected tools.
         </p>
         <form
           className="mt-4 space-y-3"
@@ -333,6 +344,7 @@ export function EmployeeActivity({
                   employee_id: employeeId,
                   message: input,
                   use_meko: useMemory,
+                  allow_tools: allowTools,
                   request_key: crypto.randomUUID(),
                 }),
               });
@@ -347,7 +359,7 @@ export function EmployeeActivity({
             }
           }}
         >
-          <Label htmlFor="test-employee-request">Request</Label>
+          <Label htmlFor="test-employee-request">Message</Label>
           <Textarea
             id="test-employee-request"
             required
@@ -363,12 +375,19 @@ export function EmployeeActivity({
             />
             Use saved knowledge
           </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={allowTools}
+              onChange={(e) => setAllowTools(e.target.checked)}
+            />
+            Allow connected tools for this request
+          </label>
           <p className="text-xs text-muted-foreground">
-            Switch off for the same-task comparison. That run bypasses memory
-            reads and writes.
+            These choices apply to messages sent here.
           </p>
           <Button type="submit" disabled={busy || !input.trim()}>
-            {busy ? "Working…" : "Run preview"}
+            {busy ? "Working…" : "Send"}
           </Button>
         </form>
       </details>
@@ -380,7 +399,7 @@ export function EmployeeActivity({
       )}
       {!isError && !runs.length && (
         <p className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
-          No work recorded yet. Connect Slack or try a preview.
+          No messages yet. Send a message here or connect Slack.
         </p>
       )}
       <div className="space-y-4">
@@ -388,7 +407,7 @@ export function EmployeeActivity({
           <article key={run.id} className="rounded-xl border p-5">
             <div className="flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
               <span>
-                {run.platform === "slack" ? "Slack" : "Preview"} · {run.status}
+                {run.platform === "slack" ? "Slack" : "Chat"} · {run.status}
                 {run.platform === "slack"
                   ? ` · delivery: ${run.delivery_status}`
                   : ""}
@@ -476,11 +495,13 @@ export function EmployeeActivity({
                     <li key={index} className="text-sm">
                       <p className="font-medium">
                         {tool.name} · {tool.status}
+                        {tool.reused ? " · reused existing result" : ""}
                       </p>
                       <pre className="mt-1 overflow-x-auto whitespace-pre-wrap break-words text-xs text-muted-foreground">
                         {JSON.stringify(tool.arguments, null, 2)}
                         {tool.result ? `\n${tool.result}` : ""}
                       </pre>
+                      {tool.status === "completed" && <ToolDownload result={tool.result} />}
                     </li>
                   ))}
                 </ul>

@@ -1,5 +1,6 @@
 services:
   database:
+    restart: unless-stopped
     image: yugabytedb/yugabyte:2026.1.2.0-b137
     user: root
     hostname: database
@@ -15,6 +16,7 @@ services:
       retries: 30
       start_period: 30s
   backend:
+    restart: unless-stopped
     build: ./apps/api
     env_file: .env
     environment:
@@ -32,6 +34,9 @@ services:
       retries: 15
       start_period: 2m
   web:
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://backend:8000
     build:
       context: .
       dockerfile: apps/web/Dockerfile
