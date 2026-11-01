@@ -66,7 +66,7 @@ async def record_message(db, org_id, employee_id, event, *, is_bot=False):
 class SlackGateway:
     def __init__(self, session_factory=async_session_factory, web_client=AsyncWebClient):
         self.session_factory, self.web_client = session_factory, web_client
-        self.clients, self.workers = [], []
+        self.clients, self.workers = {}, []
         self.pending = {}
         self.stopping = asyncio.Event()
         self.router = SlackRouterWorker(session_factory)
@@ -118,7 +118,7 @@ class SlackGateway:
             client.socket_mode_request_listeners.append(listener)
             try:
                 await client.connect()
-                self.clients.append(client)
+                self.clients[role] = client
             except Exception:
                 await client.close()
                 logger.error("Could not connect the Slack app for %s", role)
@@ -130,8 +130,9 @@ class SlackGateway:
     async def stop(self):
         self.stopping.set()
         self.router.stopping.set()
-        for client in self.clients:
+        for client in self.clients.values():
             await client.close()
+        self.clients.clear()
         for task in self.workers:
             task.cancel()
         if self.workers:
@@ -142,6 +143,11 @@ class SlackGateway:
                 await asyncio.wait_for(asyncio.gather(*tasks, return_exceptions=True), timeout=5)
             except TimeoutError:
                 pass
+
+    async def listener_connected(self, employee_type):
+        role = "shared" if settings.slack_identity_mode == "shared" else employee_type
+        client = self.clients.get(role)
+        return client is not None and await client.is_connected()
 
     async def process(self, role, payload):
         event = payload.get("event", {})

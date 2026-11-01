@@ -32,6 +32,7 @@ type Chunk = Decision & {
 type Setup = {
   app_configured: boolean;
   gateway_enabled: boolean;
+  listener_connected: boolean;
   memory_delivery_enabled: boolean;
   connected: boolean;
   oauth_redirect_uri: string;
@@ -61,6 +62,7 @@ export function SlackRouting({
   const { data: setup } = useQuery({
     queryKey: ["slack-setup", orgId, employeeId],
     queryFn: () => apiRequest<Setup>(`${base}/setup?employee_id=${employeeId}`),
+    refetchInterval: 8000,
     retry: false,
   });
   const {
@@ -91,7 +93,8 @@ export function SlackRouting({
             Employee: {setup.connected ? "connected" : "disconnected"}
           </p>
           <p>
-            Slack listeners: {setup.gateway_enabled ? "enabled" : "off"} ·
+            Slack listener:{" "}
+            {!setup.gateway_enabled ? "paused" : setup.listener_connected ? "connected" : "not connected"} ·
             Memory delivery:{" "}
             {setup.memory_delivery_enabled ? "enabled" : "paused"}
           </p>

@@ -125,9 +125,16 @@ async def setup(
         configured = bool(
             settings.slack_client_id and settings.slack_client_secret and settings.slack_app_token
         )
+    gateway = getattr(request.app.state, "slack_gateway", None)
+    listener_connected = bool(
+        employee.slack_token_enc
+        and gateway
+        and await gateway.listener_connected(employee.employee_type)
+    )
     return {
         "app_configured": configured,
         "gateway_enabled": settings.gateway_enabled,
+        "listener_connected": listener_connected,
         "memory_delivery_enabled": settings.slack_memory_enabled,
         "workspace": org.slack_team_name,
         "connected": bool(employee.slack_token_enc),

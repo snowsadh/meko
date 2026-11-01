@@ -65,8 +65,8 @@ class Settings(BaseSettings):
     agent_max_tool_rounds: int = 4
 
     # Bot Gateway
-    gateway_enabled: bool = False
-    slack_memory_enabled: bool = False
+    gateway_enabled: bool = True
+    slack_memory_enabled: bool = True
     slack_allowed_channel_ids: list[str] = []
     slack_router_batch_seconds: float = 30
     slack_router_max_messages: int = 12

@@ -10,9 +10,11 @@ Each employee reads its own memories/documents plus company knowledge. Separate 
 
 ## Slack and reasoning
 
-Slack apps use Socket Mode (Slack's outgoing event connection) and signed installation state. One company is bound to one Slack workspace. The server saves intake before acknowledging events, deduplicates the same message across role apps and retries, and queues employee work separately. Direct messages, mentions and follow-ups in an employee's thread receive replies. Ordinary visible channel messages can feed the router without triggering a reply.
+Slack apps use Socket Mode (Slack's outgoing event connection) and signed installation state. The backend starts one connection per configured role app automatically. That connection covers new workspace installations and all channels the employee is invited to; there is no per-channel listener setup. One company is bound to one Slack workspace. The server saves intake before acknowledging events, deduplicates the same message across role apps and retries, and queues employee work separately. Direct messages, mentions and follow-ups in an employee's thread receive replies. Ordinary visible channel messages can feed the router without triggering a reply.
 
 OpenAI receives the job baseline, company details, custom instructions, relevant evidence and permitted tools. Only successful tool results justify completed-action claims. Replies stay in the source thread and run in order for that employee/thread. An unconfirmed Slack send is recorded for inspection and is not automatically resent. Run one gateway process per deployment.
+
+The employee runs in the backend; Slack supplies its sender identity. A direct post made with the bot token proves outbound Slack access, not the employee's reasoning or incoming-message handling. Normal verification must enter through the listener and backend. The website reports the SDK's actual connection state separately from installation and server-enable settings.
 
 ## Approved chat-router policy
 
@@ -34,7 +36,9 @@ Company/employee setup, memory boundaries, mutations, Slack event handling and d
 
 On 2026-11-01, two product datapacks were created on the newly authorised Meko account and connected to the local Atlas demo. A real website API task saved its conversation with readback; Meko extracted the escalation rule without a separate `remember_fact` call. A fresh task retrieved that private fact and the indexed company guide and named the correct escalation owner. The company memory store did not contain the private fact. This checks existing-company reconnection and fresh scope creation; it does not prove the full signup/onboarding flow on that account.
 
-The user-owned Support app was installed through real Slack OAuth and its bot identity was verified. Its listener runs with `SLACK_ALLOWED_CHANNEL_IDS` restricted to the authorised test channel. Real posts and independent thread readback passed. Other role apps remain disabled until configured.
+The user-owned Support app was installed through real Slack OAuth and its bot identity was verified. Real posts and independent thread readback passed. The temporary test-channel filter has been removed at the user's request; normal operation follows the bot's channel memberships. `SLACK_ALLOWED_CHANNEL_IDS` remains an optional operator test boundary. Other role apps remain disabled until configured.
+
+A backend test starts one role connection before installation, completes the installation callback, and processes listener events from two newly seen channels through the reply worker without restarting or registering either channel. It uses service stubs on disposable YugabyteDB; three relevant checks passed. The deployed SDK reports a live Slack connection with no channel filter, and the website's connected status was checked in a real browser.
 
 One human mention sent before startup was manually caught up from verified Slack history, with that origin recorded in activity. A labelled, app-queued self-test compared the same support question with and without Meko; the Meko-backed answer named the stored escalation owner and both answers were read back from Slack. These checks verify application work and outbound delivery, not a fresh human Socket Mode round trip. A confirmed reply was automatically routed into employee memory and read back; none of those chunks was published company-wide. The first greeting save remains an explicit unconfirmed failure and was not automatically retried.
 

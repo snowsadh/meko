@@ -172,6 +172,11 @@ async def product(monkeypatch):
     model = StubModel()
     monkeypatch.setattr(build, "ChatOpenAI", lambda **kwargs: model)
     monkeypatch.setattr(settings, "openai_api_key", "synthetic-test-key")
+    # Local operator settings must not restrict synthetic channels or open real sockets.
+    monkeypatch.setattr(settings, "gateway_enabled", False)
+    monkeypatch.setattr(settings, "slack_memory_enabled", True)
+    monkeypatch.setattr(settings, "slack_allowed_channel_ids", [])
+    monkeypatch.setattr(settings, "slack_identity_mode", "fixed")
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=app), base_url="http://test"
     ) as client:

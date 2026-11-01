@@ -27,6 +27,7 @@ from app.gateway.router import router as slack_routing_router
 @asynccontextmanager
 async def lifespan(_app):
     gateway = SlackGateway()
+    _app.state.slack_gateway = gateway
     if settings.gateway_enabled:
         await gateway.start()
     yield

@@ -3,9 +3,11 @@ import json
 from datetime import UTC, datetime, timedelta
 from urllib.parse import parse_qs, urlparse
 from uuid import UUID, uuid4
+from types import SimpleNamespace
 
 import pytest
 from sqlalchemy import select
+from slack_sdk.socket_mode.request import SocketModeRequest
 
 from app.agent import build
 from app.agent.models import AgentRun
@@ -14,6 +16,7 @@ from app.core.meko import MekoError, meko
 from app.core.security import decrypt_token, encrypt_token
 from app.employees.models import Employee
 from app.gateway import slack_oauth
+from app.gateway import slack_bot
 from app.gateway.models import SlackChunk, SlackMessage
 from app.gateway.routing import (
     RouterChoice,
@@ -24,6 +27,7 @@ from app.gateway.routing import (
 )
 from app.gateway.slack_bot import SlackGateway
 from app.organizations.models import Organization
+from app.main import app
 from tests.conftest import setup_company
 
 
@@ -167,6 +171,81 @@ async def test_oauth_ownership_state_and_workspace(product, monkeypatch):
     assert (
         await client.get("/api/slack/oauth/callback", params={"state": other_state, "code": "test"})
     ).status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_listener_handles_installation_and_new_channels_without_restarting(product, monkeypatch):
+    client, _, model = product
+    headers, org, support, _ = await setup_company(client)
+    opened = []
+
+    class SocketClient:
+        def __init__(self, **kwargs):
+            self.socket_mode_request_listeners = []
+            self.connected = False
+            self.acks = []
+            opened.append(self)
+
+        async def connect(self):
+            self.connected = True
+
+        async def close(self):
+            self.connected = False
+
+        async def is_connected(self):
+            return self.connected
+
+        async def send_socket_mode_response(self, response):
+            self.acks.append(response.envelope_id)
+
+    class OAuthClient:
+        def __init__(self, **kwargs):
+            pass
+
+        async def oauth_v2_access(self, **kwargs):
+            return {"ok": True, "access_token": "synthetic-bot-token", "bot_user_id": "USUPPORT", "team": {"id": "TLOCAL", "name": "Local tests"}}
+
+    monkeypatch.setattr(slack_bot, "SocketModeClient", SocketClient)
+    monkeypatch.setattr(slack_bot, "FIXED_BOTS", {"support": SimpleNamespace(app_token="synthetic-app-token")})
+    monkeypatch.setattr(slack_oauth, "AsyncWebClient", OAuthClient)
+    monkeypatch.setattr(slack_oauth, "credentials", lambda emp: ("synthetic-client", "synthetic-secret"))
+    monkeypatch.setattr(settings, "slack_oauth_redirect_uri", "https://synthetic.example/api/slack/oauth/callback")
+    monkeypatch.setattr(settings, "slack_allowed_channel_ids", [])
+    monkeypatch.setattr(settings, "slack_identity_mode", "fixed")
+    monkeypatch.setattr(settings, "gateway_enabled", True)
+    gateway = SlackGateway(build.async_session_factory, SlackClient)
+    gateway.router.model = RouterModel()
+    monkeypatch.setattr(app.state, "slack_gateway", gateway, raising=False)
+    SlackClient.posts, SlackClient.fail = [], False
+    await gateway.start()
+    try:
+        assert len(opened) == 1
+        setup_url = f"/api/organizations/{org['id']}/slack/setup?employee_id={support['id']}"
+        assert (await client.get(setup_url, headers=headers)).json()["listener_connected"] is False
+        install = await client.post('/api/slack/install', headers=headers, json={'org_id': org['id'], 'employee_id': support['id']})
+        state = parse_qs(urlparse(install.json()['authorize_url']).query)['state'][0]
+        linked = await client.get('/api/slack/oauth/callback', params={'state': state, 'code': 'synthetic'})
+        assert linked.status_code == 303
+        assert (await client.get(setup_url, headers=headers)).json()["listener_connected"] is True
+
+        socket = opened[0]
+        listener = socket.socket_mode_request_listeners[0]
+        for index, channel in enumerate(('CNEWONE', 'CNEWTWO')):
+            request = SocketModeRequest(type='events_api', envelope_id=f'envelope-{index}', payload=event('<@USUPPORT> Help me', kind='app_mention', channel=channel))
+            await listener(socket, request)
+            assert request.envelope_id in socket.acks
+        async with asyncio.timeout(15):
+            while len(SlackClient.posts) < 2:
+                await asyncio.sleep(0.05)
+        assert len(opened) == 1  # One app connection covers both newly seen channels.
+        assert {post['channel'] for post in SlackClient.posts} == {'CNEWONE', 'CNEWTWO'}
+        assert len(model.messages) == 2
+        assert all(post['text'] == 'A model stub reply for the request.' for post in SlackClient.posts)
+        socket.connected = False
+        assert (await client.get(setup_url, headers=headers)).json()["listener_connected"] is False
+    finally:
+        await gateway.stop()
+    assert not await gateway.listener_connected('support')
 
 
 @pytest.mark.asyncio
