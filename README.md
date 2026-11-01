@@ -4,11 +4,13 @@
 
 OpenHuman turns company knowledge into AI coworkers that work alongside you in Slack. A **datapack** is Meko's container for conversations, memories and documents. Each coworker gets a private one, along with a role, instructions and connected tools. One common company datapack gives the whole team shared context.
 
-Meko gives these coworkers continuity: a support fix, company decision or customer preference can inform the next task. OpenHuman connects that memory to useful work—answering customers, researching prospects and creating presentations. As the team works, a shared chat router sends new context to the right datapacks, and Meko extracts facts employees can recall later.
+Meko gives these coworkers continuity: a support fix, company decision or customer preference can inform the next task. OpenHuman makes that context actionable. Coworkers use the tools connected to their role to work across your team's systems, follow company rules and carry a task through several steps. A shared chat router sends new context to the right datapacks, and Meko extracts facts employees can recall later.
 
 Built by **tungtungtungsahur** for **hackCBS 9.0 · Meko Track A**.
 
 ## Architecture
+
+Tool connections use the **Model Context Protocol (MCP)**. The diagram includes integration examples; the [setup guide](docs/setup.md#employee-actions) lists current connection support.
 
 ![OpenHuman architecture: dashboard, AI employees, connected tools, and Meko with one common company datapack and separate employee datapacks](docs/assets/architecture.png)
 
@@ -16,16 +18,18 @@ Example layout for Atlas. Each employee reads its own context and the common com
 
 ## What you can build
 
-- **Customer support:** give Alex product guides and runbooks so he can explain the right fix, find the escalation owner and draft a customer reply.
-- **HR:** give Allison the company handbook and private leave records so she can answer policy questions and check remaining leave.
-- **Sales:** give Marcus your product brief so he can research prospects and turn the findings into a presentation.
+The role, knowledge and connected tools determine what a coworker can take on:
+
+- **Customer support:** use product guides and past resolutions to handle familiar problems, prepare replies and follow up through connected support workflows.
+- **HR:** apply company policy to private employee records, check leave balances and handle requests through connected HR workflows.
+- **Sales:** combine product knowledge and past customer conversations to research prospects, prepare account briefs and help with follow-ups.
 
 ## What you can do
 
 - Give each employee the documents relevant to their job.
 - Talk through Slack mentions, direct messages and threads, or use **Chat** on the website.
 - Inspect recalled sources and saved memories; add, correct or forget a fact.
-- Connect web search, PowerPoint generation and bar charts. Review the results and download generated files from the website.
+- Connect tools so employees can act across your team's systems. Review tool results, completed work and generated files from the website.
 
 ## Setup in five steps
 
